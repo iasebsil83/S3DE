@@ -76,7 +76,25 @@ float angleStep = 0.01;
 
 
 
-// ---------------- EXECUTION ----------------
+// ---------------- 3D SCENE ----------------
+
+// ---- build ----
+void buildScene(){
+	//
+}
+
+
+
+
+
+
+
+
+
+
+
+
+// ---------------- EVENTS ----------------
 
 // ---- event handlers ----
 void S3DE_timedExecution(){
@@ -85,12 +103,12 @@ void S3DE_timedExecution(){
 
 void S3DE_display(){
 	//blue filled rectangle at the bottom left corner
-	S3DE_setColor(  0,  0,255);
-	S3DE_rectangle(100,100, 200,200, 1);
+	//S3DE_setColor(  0,  0,255);
+	//S3DE_rectangle(100,100, 200,200, 1);
 
 	//red unfilled rectangle at the top right corner
-	S3DE_setColor(255,  0,  0);
-	S3DE_rectangle(maxl-100,maxh-100, maxl-200,maxh-200, 0);
+	//S3DE_setColor(255,  0,  0);
+	//S3DE_rectangle(maxl-100,maxh-100, maxl-200,maxh-200, 0);
 }
 
 void S3DE_keyPressed(char key){
@@ -143,6 +161,17 @@ void S3DE_reshape(int newWidth,int newHeight){
 
 
 
+
+
+
+
+
+
+
+
+
+// ---------------- EXECUTION ----------------
+
 // ---- main ----
 int main(int argc, char **argv){
 
@@ -151,12 +180,7 @@ int main(int argc, char **argv){
 	S3DE_setTimedExecution(100);
 
 	//create 3D scene
-	S3DE_addPlak(
-		20,20,20,
-		100,100,100,
-		50,200,50,
-		S3DE_setPixelRGBA(255,0,0, 255)
-	);
+	buildScene();
 
 	//launch S3DE
 	printf("Starting S3DE [0.1.0]\n");

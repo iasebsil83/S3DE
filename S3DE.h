@@ -50,10 +50,20 @@ enum S3DE_MOUSE{
 
 
 
-//3D point structure
+//3D point
 typedef struct{
 	int x,y,z;
 } xyz;
+
+
+
+//3D plaks (linked list)
+struct PLAK{
+	xyz points[3];
+	int color;
+	struct PLAK* next;
+};
+typedef struct PLAK plak;
 
 
 
@@ -70,6 +80,7 @@ void S3DE_addPlak(
 	int color
 );
 void S3DE_delPlak(int index);
+plak* S3DE_getPlak(int index);
 
 
 
@@ -85,6 +96,7 @@ void S3DE_refresh();
 void S3DE_fullScreen();
 void S3DE_setColor(int r, int v, int b);
 void S3DE_setThickness(float thickness);
+int S3DE_inScreen(int x,int y);
 
 //graphics
 void S3DE_point(float x, float y);
