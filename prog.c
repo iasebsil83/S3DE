@@ -78,6 +78,44 @@ float FOVstep = 0.0001;
 
 
 
+// ---------------- 3D SCENE ----------------
+
+//init
+void buildScene(){
+	//by Beau : "https://www.prusaprinters.org/social/20555-beau/prints"
+	S3DE_addPlaksFromSTL(
+		"STL/dog.stl",
+		0,-200,800,
+		S3DE_setPixelRGBA(0,0,0,255)
+	);
+
+	//by Vash Wolf : "https://www.myminifactory.com/users/sgtcold1"
+	S3DE_addPlaksFromSTL(
+		"STL/minecraft-world.stl",
+		0,0,400,
+		S3DE_setPixelRGBA(255,0,255,255)
+	);
+
+	//just a simple green plak
+	S3DE_addPlak(
+		100,650,2500,
+		600,650,3000,
+		300, 50,2800,
+		S3DE_setPixelRGBA(0,255,0,255)
+	);
+}
+
+
+
+
+
+
+
+
+
+
+
+
 // ---------------- EVENTS ----------------
 
 // ---- event handlers ----
@@ -153,8 +191,10 @@ void S3DE_keyPressed(char key){
 		case 'L':
 		case 'l':
 			S3DE_saveSTLfromPlaks("STL/save.stl");
+			printf("Saved scene in STL/save.stl\n");
 		break;
 
+		//fullScreen
 		case 'F':
 		case 'f':
 			S3DE_fullScreen();
@@ -219,24 +259,14 @@ int main(int argc, char** argv){
 	S3DE_setTimedExecution(100);
 
 	//create 3D scene
-	S3DE_addPlaksFromSTL(
-		"STL/dog.stl",
-		0,-200,400,
-		S3DE_setPixelRGBA(255,0,0,255)
-	);
-	S3DE_addPlak(
-		100,650,200,
-		600,650,500,
-		300, 50,800,
-		S3DE_setPixelRGBA(0,255,0,255)
-	);
+	buildScene();
 
 	//go in an interresting place + look in an interresting direction
-	S3DE_addAngleX(1.800000);
-	S3DE_addAngleY(6.499996);
-	S3DE_position.x = -700;
-	S3DE_position.y =    0;
-	S3DE_position.z = -850;
+	//S3DE_addAngleX(1.800000);
+	//S3DE_addAngleY(6.499996);
+	//S3DE_position.x = -700;
+	//S3DE_position.y =    0;
+	//S3DE_position.z = -850;
 
 	//launch S3DE
 	printf("Starting S3DE [0.1.3]\n");

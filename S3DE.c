@@ -782,13 +782,13 @@ void S3DE_addPlaksFromSTL(char* fileName, int dx,int dy,int dz, int color){
 							S3DE_addPlak(
 								x1,y1,z1,
 								x2,y2,z2,
-								x3,y3,z3, color
+								x3,y3,z3, color //regular color
 							);
 						else
 							S3DE_addPlak(
 								x1,y1,z1,
 								x2,y2,z2,
-								x3,y3,z3, 65535
+								x3,y3,z3, (~color)|255 //opposite color
 							);
 						#ifdef DEBUG_ON
 						printf("DEBUG > S3DE.c : S3DE_addPlaksFromSTL() : ");
@@ -940,9 +940,9 @@ static void S3DEL_display(){
 	plak* current = S3DE_plaks;
 	for(int p=0; p < S3DE_plaksNbr; p++){
 		if(
-			//abs(current->points[0].x - S3DE_position.x) < S3DE_RENDER_DISTANCE &&
-			//abs(current->points[0].y - S3DE_position.y) < S3DE_RENDER_DISTANCE &&
-			//abs(current->points[0].z - S3DE_position.z) < S3DE_RENDER_DISTANCE &&
+			//abs(current->points[0].x - S3DE_position.x) < S3DE_RENDER_DISTANCE && //disable this optimization rule because
+			//abs(current->points[0].y - S3DE_position.y) < S3DE_RENDER_DISTANCE && //of S3DE_position is not always correct
+			//abs(current->points[0].z - S3DE_position.z) < S3DE_RENDER_DISTANCE && //due to S3DE_goStraight() arrangements
 			//abs(current->points[1].x - S3DE_position.x) < S3DE_RENDER_DISTANCE &&
 			//abs(current->points[1].y - S3DE_position.y) < S3DE_RENDER_DISTANCE &&
 			//abs(current->points[1].z - S3DE_position.z) < S3DE_RENDER_DISTANCE &&
