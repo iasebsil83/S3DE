@@ -90,11 +90,13 @@ void buildScene(){
 	);
 
 	//by Vash Wolf : "https://www.myminifactory.com/users/sgtcold1"
+	/*
 	S3DE_addPlaksFromSTL(
 		"STL/minecraft-world.stl",
 		0,0,400,
 		S3DE_setPixelRGBA(255,0,255,255)
 	);
+	*/
 
 	//just a simple green plak
 	S3DE_addPlak(
@@ -210,6 +212,11 @@ void S3DE_keyPressed(char key){
 			printf("Decreasing FOV from %f to ", S3DE_FOV);
 			S3DE_FOV -= FOVstep;
 			printf("%f.\n", S3DE_FOV);
+		break;
+
+		case S3DE_KEY_ESCAPE:
+			S3DE_stop();
+			printf("S3DE stopped.\n");
 		break;
 	}
 	S3DE_refresh();

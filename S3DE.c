@@ -495,7 +495,13 @@ void S3DE_delPlak(int index){
 
 	//first case
 	if(index == 0){
-		plak* newFirst = S3DE_getPlak(1);
+		plak* newFirst;
+
+		//alone case
+		if(S3DE_plaksNbr == 1)
+			newFirst = NULL;
+		else
+			newFirst = S3DE_getPlak(1);
 
 		//free old first
 		free(S3DE_plaks);
@@ -1411,6 +1417,13 @@ void S3DE_start(){
 }
 
 void S3DE_stop(){
+	//free 3D engine memory
+	free(S3DE_colorBuffer);
+	free(S3DE_depthBuffer);
+	for(int p=0; p < S3DE_plaksNbr; p++)
+		S3DE_delPlak(S3DE_plaksNbr-1);
+
+	//stop 2D engine
 	glutDestroyWindow(S3DE_window);
 	exit(EXIT_SUCCESS);
 }
