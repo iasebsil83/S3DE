@@ -79,6 +79,9 @@
     - Added constant S3DE_BACKSCENE_LIMIT to render only plaks that are
       in front of you.
 
+    22/11/2020 > [0.1.4] :
+    - Fixed bug : diagonals appeared in 2D rectangles and quads.
+
     BUGS : S3DE_goStraight() is temporarily broken, however an alternative
                is made in S3DE_real().
     NOTES : S3DE_addPlaksFromSTL temporary colors plaks in 2 colors :
@@ -1235,6 +1238,13 @@ void S3DE_rectangle(float x1,float y1, float x2,float y2, int filled){
 			glVertex2f(x2,y2);
 			glVertex2f(x1,y2);
 		glEnd();
+
+		//GPU weakness : remove diagonals
+		float thickness;
+		glGetFloatv(GL_LINE_WIDTH, &thickness);
+		glLineWidth(1.f);
+		S3DE_line(x1,y1, x2,y2);
+		glLineWidth(thickness);
 	}else{
 		S3DE_line(x1,y1, x2,y1);
 		S3DE_line(x2,y1, x2,y2);
@@ -1251,6 +1261,13 @@ void S3DE_quad(float x1,float y1, float x2,float y2, float x3,float y3, float x4
 			glVertex2f(x3,y3);
 			glVertex2f(x4,y4);
 		glEnd();
+
+		//GPU weakness : remove diagonals
+		float thickness;
+		glGetFloatv(GL_LINE_WIDTH, &thickness);
+		glLineWidth(1.f);
+		S3DE_line(x1,y1, x3,y3);
+		glLineWidth(thickness);
 	}else{
 		S3DE_line(x1,y1, x2,y2);
 		S3DE_line(x2,y2, x3,y3);
