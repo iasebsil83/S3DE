@@ -36,7 +36,7 @@
 
 
 
-/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ S3DE [0.1.3] ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ S3DE [0.1.5] ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                             Simple 3Dimensional Engine
 
     Developped using freeglut3 (or just GLUT), a graphical 2D/3D engine.
@@ -82,6 +82,13 @@
     22/11/2020 > [0.1.4] :
     - Fixed bug : diagonals appeared in 2D rectangles and quads.
 
+    08/12/2020 > [0.1.5] :
+    - Fixed bug : Mouse Y coordinate is inverted.
+    - Modified S2DEL_reshape() :
+      Now, S3DE_newWidth & S3DE_newHeight are set before
+      S3DE_RESHAPE event, and then
+      S3DE_width & S3DE_height are set.
+
     BUGS : S3DE_goStraight() is temporarily broken, however an alternative
                is made in S3DE_real().
     NOTES : S3DE_addPlaksFromSTL temporary colors plaks in 2 colors :
@@ -112,9 +119,7 @@
 //global vars
 static int S3DE_window = -1;
 static int S3DE_timedExecution_delay = -1;
-static int S3DE_width    = 0;
 static int S3DE_width_2  = 0;
-static int S3DE_height   = 0;
 static int S3DE_height_2 = 0;
 static int* S3DE_colorBuffer = NULL;
 static float* S3DE_depthBuffer = NULL;
@@ -151,13 +156,20 @@ static plak* S3DE_plaks = NULL;
 
 
 
-//event handlers
-extern void S3DE_timedExecution();
-extern void S3DE_display();
-extern void S3DE_keyPressed(char key);
-extern void S3DE_mousePressed(int x,int y, int state);
-extern void S3DE_mouseMoved(int x,int y);
-extern void S3DE_reshape(int newWidth,int newHeight);
+//event variables
+int S3DE_mouseState  = 0; //mouse
+int S3DE_mouseButton = 0;
+int S3DE_mouseX      = 0;
+int S3DE_mouseY      = 0;
+int S3DE_keyState       = 0; //keyboard
+unsigned short S3DE_key = 0;
+unsigned int S3DE_newWidth  = 0; //resize
+unsigned int S3DE_newHeight = 0;
+unsigned int S3DE_width  = 0;
+unsigned int S3DE_height = 0;
+
+//event handler
+extern void S3DE_event(int event);
 
 
 
@@ -314,7 +326,7 @@ static int* S3DE_getLine(int x1,int y1, int x2,int y2){ //create a chain of coor
 	//void line
 	if(!difX && !difY){
 		int* line = malloc(4);
-		
+
 		//error case
 		if(line == NULL){
 			printf("FATAL ERROR > S3DE.c : S3DE_getLine() : ");
@@ -917,7 +929,7 @@ static void S3DEL_timedExecution(int i){
 				S3DEL_timedExecution,
 				S3DE_timedExecution_delay
 			);
-			S3DE_timedExecution();
+			S3DE_event(S3DE_TIMER);
 		}
 	}
 }
@@ -989,7 +1001,7 @@ static void S3DEL_display(){
 	);
 
 	//extern program display
-	S3DE_display();
+	S3DE_event(S3DE_DISPLAY);
 	glutSwapBuffers();
 }
 
@@ -997,142 +1009,45 @@ static void S3DEL_display(){
 
 //keyboard
 static void S3DEL_keyPressed(GLubyte g, int x,int y){
-	char c = (char)g;
-	switch(c){
-		case 8:
-			S3DE_keyPressed(S3DE_KEY_BACKSPACE);
-		break;
-		case 9:
-			S3DE_keyPressed(S3DE_KEY_TAB);
-		break;
-		case 13:
-			S3DE_keyPressed(S3DE_KEY_ENTER);
-		break;
-		case 27:
-			S3DE_keyPressed(S3DE_KEY_ESCAPE);
-		break;
-		case 127:
-			S3DE_keyPressed(S3DE_KEY_DELETE);
-		break;
-		default:
-			S3DE_keyPressed(c);
-	}
+	S3DE_key = g;
+	S3DE_keyState = S3DE_KEY_PRESSED;
+	S3DE_event(S3DE_KEYBOARD);
 }
 
 static void S3DEL_keyPressed_special(int keyCode, int x,int y){
-	switch(keyCode){
-		case GLUT_KEY_F1:
-			S3DE_keyPressed(S3DE_KEY_F1);
-		break;
-		case GLUT_KEY_F2:
-			S3DE_keyPressed(S3DE_KEY_F2);
-		break;
-		case GLUT_KEY_F3:
-			S3DE_keyPressed(S3DE_KEY_F3);
-		break;
-		case GLUT_KEY_F4:
-			S3DE_keyPressed(S3DE_KEY_F4);
-		break;
-		case GLUT_KEY_F5:
-			S3DE_keyPressed(S3DE_KEY_F5);
-		break;
-		case GLUT_KEY_F6:
-			S3DE_keyPressed(S3DE_KEY_F6);
-		break;
-		case GLUT_KEY_F7:
-			S3DE_keyPressed(S3DE_KEY_F7);
-		break;
-		case GLUT_KEY_F8:
-			S3DE_keyPressed(S3DE_KEY_F8);
-		break;
-		case GLUT_KEY_F9:
-			S3DE_keyPressed(S3DE_KEY_F9);
-		break;
-		case GLUT_KEY_F10:
-			S3DE_keyPressed(S3DE_KEY_F10);
-		break;
-		case GLUT_KEY_F11:
-			S3DE_keyPressed(S3DE_KEY_F11);
-		break;
-		case GLUT_KEY_F12:
-			S3DE_keyPressed(S3DE_KEY_F12);
-		break;
-		case GLUT_KEY_UP:
-			S3DE_keyPressed(S3DE_KEY_UP);
-		break;
-		case GLUT_KEY_DOWN:
-			S3DE_keyPressed(S3DE_KEY_DOWN);
-		break;
-		case GLUT_KEY_LEFT:
-			S3DE_keyPressed(S3DE_KEY_LEFT);
-		break;
-		case GLUT_KEY_RIGHT:
-			S3DE_keyPressed(S3DE_KEY_RIGHT);
-		break;
-		case GLUT_KEY_PAGE_UP:
-			S3DE_keyPressed(S3DE_KEY_PAGE_UP);
-		break;
-		case GLUT_KEY_PAGE_DOWN:
-			S3DE_keyPressed(S3DE_KEY_PAGE_DOWN);
-		break;
-		case GLUT_KEY_HOME:
-			S3DE_keyPressed(S3DE_KEY_HOME);
-		break;
-		case GLUT_KEY_END:
-			S3DE_keyPressed(S3DE_KEY_END);
-		break;
-		case GLUT_KEY_INSERT:
-			S3DE_keyPressed(S3DE_KEY_INSERT);
-		break;
-		default:
-			S3DE_keyPressed(S3DE_KEY_UNDEFINED);
-	}
+	S3DE_key = 256 + (unsigned char)keyCode;
+	S3DE_keyState = S3DE_KEY_PRESSED;
+	S3DE_event(S3DE_KEYBOARD);
 }
 
 
 
 //mouse
 static void S3DEL_mousePressed(int button, int state, int x,int y){
-	switch(button){
-		case GLUT_LEFT_BUTTON:
-			if(state == GLUT_DOWN)
-				S3DE_mousePressed(x,y, S3DE_LEFT_PRESSED);
-			else
-				S3DE_mousePressed(x,y, S3DE_LEFT_RELEASED);
-		break;
-		case GLUT_MIDDLE_BUTTON:
-			if(state == GLUT_DOWN)
-				S3DE_mousePressed(x,y, S3DE_MIDDLE_PRESSED);
-			else
-				S3DE_mousePressed(x,y, S3DE_MIDDLE_RELEASED);
-		break;
-		case GLUT_RIGHT_BUTTON:
-			if(state == GLUT_DOWN)
-				S3DE_mousePressed(x,y, S3DE_RIGHT_PRESSED);
-			else
-				S3DE_mousePressed(x,y, S3DE_RIGHT_RELEASED);
-		break;
-	}
+	S3DE_mouseX = x;
+	S3DE_mouseY = S3DE_height - y;
+	S3DE_mouseState = state;
+	S3DE_mouseButton = button;
+	S3DE_event(S3DE_MOUSECLICK);
 }
 
 static void S3DEL_mouseMoved(int x,int y){
-	S3DE_mouseMoved(x,y);
-}
-
-static void S3DEL_mouseMoved_passive(int x,int y){
-	S3DE_mouseMoved(x,y);
+	S3DE_mouseX = x;
+	S3DE_mouseY = S3DE_height - y;
+	S3DE_event(S3DE_MOUSEMOVE);
 }
 
 
 
 //window reshape
 static void S3DEL_reshape(int newWidth,int newHeight){
-	//error cases
-	if(newWidth <= 0 || newHeight <= 0){
-		printf("RUNTIME ERROR > S3DE.c : S3DEL_reshape() : ");
-		printf("Width and height must be positive numbers.\n");
-		return;
-	}
+
+	//raise event with old values
+	S3DE_newWidth  = newWidth;
+	S3DE_newHeight = newHeight;
+	S3DE_event(S3DE_RESIZE);
+	S3DE_width  = newWidth;
+	S3DE_height = newHeight;
 
 	//set new values
 	S3DE_width    = newWidth;
@@ -1162,7 +1077,6 @@ static void S3DEL_reshape(int newWidth,int newHeight){
 	glOrtho(0.f,(GLdouble)newWidth, 0.f,(GLdouble)newHeight, -1.f,1.f);
 	glMatrixMode(GL_MODELVIEW);
 	S3DE_refresh();
-	S3DE_reshape(newWidth,newHeight);
 }
 
 
@@ -1339,7 +1253,7 @@ void S3DE_setTimedExecution(int ms){
 // ---------------- BASICS -----------------
 
 //init
-void S3DE_init(int argc, char** argv, const char* name, int width,int height){
+void S3DE_init(int argc, char** argv, const char* name, unsigned int width,unsigned int height){
 	//error case
 	if(name == NULL){
 		printf("RUNTIME ERROR > S3DE.c : S3DE_init() : ");
@@ -1426,7 +1340,7 @@ void S3DE_start(){
 	glutSpecialFunc      (S3DEL_keyPressed_special);
 	glutMouseFunc        (S3DEL_mousePressed      );
 	glutMotionFunc       (S3DEL_mouseMoved        );
-	glutPassiveMotionFunc(S3DEL_mouseMoved_passive);
+	glutPassiveMotionFunc(S3DEL_mouseMoved        );
 	glutReshapeFunc      (S3DEL_reshape           );
 
 	//launch event loop
