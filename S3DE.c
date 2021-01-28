@@ -646,8 +646,8 @@ void S3DE_addPlaksFromSTL(char* fileName, int dx,int dy,int dz, int color){
 		text[c] = '\0';
 
 	//read from file
-	fgets(text,file_len,f);
-	fscanf(f,"%[^!]", text);
+	char* temp=fgets(text,file_len,f); //temp avoids compiler warnings
+	temp+=fscanf(f,"%[^!]", text);
 	fclose(f);
 	if(text == NULL){
 		printf("RUNTIME ERROR > S3DE.c : S3DE_addPlaksFromSTL() : ");
