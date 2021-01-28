@@ -199,7 +199,8 @@ enum S3DE_EVENTS{
 #define S3DE_UP 4
 #define S3DE_DOWN 5
 #define S3DE_STL_AMPLIFICATION 25       //STL files values will be amplified
-                                        //    to correspond to the scene's scale
+#define S3DE_STL_BICOLOR_ENABLE         //    to correspond to the scene's scale
+
 
 
 //3D point
