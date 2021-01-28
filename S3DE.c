@@ -1,12 +1,12 @@
 // ---------------- IMPORTATIONS ----------------
 
-//compatibility
+//openGL compatibility
 #ifdef __APPLE__
 	#include <OpenGL/gl.h>
 	#include <OpenGL/CGLMacro.h>
-	#include <GLUT/glut.h>		// Header File For The GLut Library
+	#include <GLUT/glut.h>
 #else
-	#include <glut.h>			// Header File For The GLut Library
+	#include <glut.h>
 	#include <X11/Xlib.h>
 	#include <GL/glx.h>
 #endif
