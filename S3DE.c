@@ -91,10 +91,10 @@
 
     BUGS : S3DE_goStraight() is temporarily broken, however an alternative
                is made in S3DE_real().
-    NOTES : S3DE_addPlaksFromSTL temporary colors plaks in 2 colors :
-                - half the time in given color
+    NOTES : S3DE_addPlaksFromSTL() temporary colors plaks in 2 colors :
+                - half the time in the given color
                 - half the time in its oposite
-            This is just to make the scene lokking better.
+            Uncomment definition of S3DE_STL_BICOLOR_ENABLE to disable it.
 
     Contact     : i.a.sebsil83@gmail.com
     Youtube     : https://www.youtube.com/user/IAsebsil83
@@ -106,7 +106,7 @@
     LICENCE :
 
     S3DE
-    Copyright (C) 2020  Sebastien SILVANO
+    Copyright (C) 2021  Sebastien SILVANO
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
@@ -816,19 +816,23 @@ void S3DE_addPlaksFromSTL(char* fileName, int dx,int dy,int dz, int color){
 								strcat(floatText, current);
 						}
 
-						//terminate registration of the plak <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< temp
+						//terminate registration of the plak
+						#ifdef S3DE_STL_BICOLOR_ENABLE
 						if(S3DE_plaksNbr%2 == 0)
+						#endif
 							S3DE_addPlak(
 								x1,y1,z1,
 								x2,y2,z2,
 								x3,y3,z3, color //regular color
 							);
+						#ifdef S3DE_STL_BICOLOR_ENABLE
 						else
 							S3DE_addPlak(
 								x1,y1,z1,
 								x2,y2,z2,
 								x3,y3,z3, (~color)|255 //opposite color
 							);
+						#endif
 						#ifdef DEBUG_ON
 						printf("DEBUG > S3DE.c : S3DE_addPlaksFromSTL() : ");
 						printf("Added Plak {\n");
