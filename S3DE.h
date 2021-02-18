@@ -1,3 +1,17 @@
+#ifndef S3DE_H
+#define S3DE_H
+
+
+
+
+
+
+
+
+
+
+
+
 // ---------------- DECLARATIONS ----------------
 
 //keyboard constants
@@ -291,7 +305,7 @@ void S3DE_imageRGBA(int x,int y, int width,int height, int* data);
 int S3DE_setPixelRGBA(unsigned char r, unsigned char g, unsigned char b, unsigned char a);
 
 //timed executions
-void S3DE_setTimedExecution(int ms);
+void S3DE_setTimer(int ms);
 
 
 
@@ -308,3 +322,16 @@ void S3DE_init(int argc, char** argv, const char* name, unsigned int width,unsig
 //start - stop
 void S3DE_start();
 void S3DE_stop();
+
+
+
+
+
+
+
+
+
+
+
+
+#endif

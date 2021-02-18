@@ -36,7 +36,7 @@
 
 
 
-/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ S3DE [0.1.5] ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ S3DE [0.1.6] ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                             Simple 3Dimensional Engine
 
     Developped using freeglut3 (or just GLUT), a graphical 2D/3D engine.
@@ -88,6 +88,10 @@
       Now, S3DE_newWidth & S3DE_newHeight are set before
       S3DE_RESHAPE event, and then
       S3DE_width & S3DE_height are set.
+
+    18/02/2021 > [0.1.6] :
+    - Added anti-redefinition beacon in header.
+    - Renamed S3DE_setTimedExecution() in S3DE_setTimer() to fit with S2DE.
 
     BUGS : S3DE_goStraight() is temporarily broken, however an alternative
                is made in S3DE_real().
@@ -1249,7 +1253,7 @@ int S3DE_setPixelRGBA(unsigned char r, unsigned char g, unsigned char b, unsigne
 
 
 //timed executions
-void S3DE_setTimedExecution(int ms){
+void S3DE_setTimer(int ms){
 	if(S3DE_timedExecution_delay < 0 && ms >= 0)
 		glutTimerFunc(
 			(unsigned int)ms,

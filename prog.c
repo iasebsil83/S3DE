@@ -258,7 +258,7 @@ int main(int argc, char** argv){
 
 	//init S3DE
 	S3DE_init(argc,argv, "Program Name [V.V.V]", 700,700);
-	S3DE_setTimedExecution(100);
+	S3DE_setTimer(100);
 
 	//create 3D scene
 	buildScene();
@@ -271,7 +271,7 @@ int main(int argc, char** argv){
 	//S3DE_position.z = -850;
 
 	//launch S3DE
-	printf("Starting S3DE [0.1.5]\n");
+	printf("Starting S3DE [0.1.6]\n");
 	S3DE_start();
 
 	return EXIT_SUCCESS;
