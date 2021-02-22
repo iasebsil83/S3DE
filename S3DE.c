@@ -51,9 +51,9 @@
     2D engine of GLUT and gives it a third dimension manually. This was made
     like this to make the engine the more SIMPLE.
 
-        The whole 2D engine of S3DE is made from S3DE (which is another
+        The whole 2D engine of S3DE is made from S2DE (which is another
     library I made). You can check it out at :
-                      https://github.com/iasebsil83/S3DE
+                      https://github.com/iasebsil83/S2DE
 
         This implies that all you can do with S2DE is possible with S3DE too.
     You can use S3DE as a 3D engine, 2D engine or both as you want.
