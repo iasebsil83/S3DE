@@ -100,6 +100,12 @@
                 - half the time in its oposite
             Uncomment definition of S3DE_STL_BICOLOR_ENABLE to disable it.
 
+    S2DE is now compatible with another library I made
+    for PNG image manipulation : PNG.c/.h.
+    It is available here :
+            https://github.com/iasebsil83/C_PNG
+    Use S2DE_imageRGBA() to draw image on screen.
+
     Contact     : i.a.sebsil83@gmail.com
     Youtube     : https://www.youtube.com/user/IAsebsil83
     GitHub repo : https://github.com/iasebsil83
