@@ -434,7 +434,7 @@ static int* S3DE_getLine(int x1,int y1, int x2,int y2){ //create a chain of coor
 
 static void S3DE_render(plak* p){
 	//get real points
-	xyz* realPoints = malloc(3*sizeof(xyz));
+	xyz realPoints[3];
 	realPoints[0] = S3DE_real(p->points[0]);
 	realPoints[1] = S3DE_real(p->points[1]);
 	realPoints[2] = S3DE_real(p->points[2]);
@@ -482,7 +482,6 @@ static void S3DE_render(plak* p){
 
 	//free main line & realpoints
 	free(line_01);
-	free(realPoints);
 }
 
 
