@@ -1292,17 +1292,6 @@ void S3DE_init(int argc, char** argv, const char* name, unsigned int width,unsig
 		return;
 	}
 
-	//compatibility
-	#ifdef __linux__
-		int majOGL;
-		int minOGL;
-		Display *dsp = XOpenDisplay(NULL);
-		if(dsp != NULL){
-			glXQueryVersion(dsp, &majOGL, &minOGL);
-			XCloseDisplay(dsp);
-		}
-	#endif
-
 	//init window
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
