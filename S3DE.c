@@ -92,6 +92,8 @@
     18/02/2021 > [0.1.6] :
     - Added anti-redefinition beacon in header.
     - Renamed S3DE_setTimedExecution() in S3DE_setTimer() to fit with S2DE.
+    - Added keyreleased events.
+    - Changed example program.
 
     BUGS : S3DE_goStraight() is temporarily broken, however an alternative
                is made in S3DE_real().
@@ -1051,10 +1053,22 @@ static void S3DEL_keyPressed_special(int keyCode, int x,int y){
 	S3DE_event(S3DE_KEYBOARD);
 }
 
+static void S3DEL_keyReleased(GLubyte g, int x,int y){
+	S3DE_key = g;
+	S3DE_keyState = S3DE_KEY_RELEASED;
+	S3DE_event(S3DE_KEYBOARD);
+}
+
+static void S3DEL_keyReleased_special(int keyCode, int x,int y){
+	S3DE_key = 256 + (unsigned char)keyCode;
+	S3DE_keyState = S3DE_KEY_RELEASED;
+	S3DE_event(S3DE_KEYBOARD);
+}
+
 
 
 //mouse
-static void S3DEL_mousePressed(int button, int state, int x,int y){
+static void S3DEL_mouseButton(int button, int state, int x,int y){
 	S3DE_mouseX = x;
 	S3DE_mouseY = S3DE_height - y;
 	S3DE_mouseState = state;
@@ -1312,6 +1326,7 @@ void S3DE_init(int argc, char** argv, const char* name, unsigned int width,unsig
 	glEnable(GL_LINE_SMOOTH);
 	glEnable(GL_POLYGON_SMOOTH);
 	glEnable(GL_NORMALIZE);
+	glutSetKeyRepeat(GLUT_KEY_REPEAT_OFF);
 
 	//math init
 	S3DE_cosX = cos(S3DE_angleX);
@@ -1348,22 +1363,23 @@ void S3DE_init(int argc, char** argv, const char* name, unsigned int width,unsig
 	printf("DEBUG > S3DE.c : S3DE_init() : ");
 	printf("%i plaks loaded.\n",S3DE_plaksNbr);
 	#endif
+
+	//set local S3DE event handlers (S3DEL)
+	glutDisplayFunc      (S3DEL_display            );
+	glutKeyboardFunc     (S3DEL_keyPressed         );
+	glutSpecialFunc      (S3DEL_keyPressed_special );
+	glutKeyboardUpFunc   (S3DEL_keyReleased        );
+	glutSpecialUpFunc    (S3DEL_keyReleased_special);
+	glutMouseFunc        (S3DEL_mouseButton        );
+	glutMotionFunc       (S3DEL_mouseMoved         );
+	glutPassiveMotionFunc(S3DEL_mouseMoved         );
+	glutReshapeFunc      (S3DEL_reshape            );
 }
 
 
 
 //start - stop
 void S3DE_start(){
-	//set local S3DE event handlers (S3DEL)
-	glutDisplayFunc      (S3DEL_display           );
-	glutKeyboardFunc     (S3DEL_keyPressed        );
-	glutSpecialFunc      (S3DEL_keyPressed_special);
-	glutMouseFunc        (S3DEL_mousePressed      );
-	glutMotionFunc       (S3DEL_mouseMoved        );
-	glutPassiveMotionFunc(S3DEL_mouseMoved        );
-	glutReshapeFunc      (S3DEL_reshape           );
-
-	//launch event loop
 	glutMainLoop();
 }
 
