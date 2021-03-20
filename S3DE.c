@@ -284,8 +284,7 @@ void S3DE_goStraight(float distance, char direction){
 			S3DE_position.y -= distance;
 		break;
 		default:
-			printf("RUNTIME ERROR > S3DE.c : S3DE_goStraight() : ");
-			printf("Unknown direction \"%i\".\n", (int)direction);
+			printf("RUNTIME ERROR > S3DE.c : S3DE_goStraight() : Unknown direction \"%i\".\n", (int)direction);
 	}
 }
 
@@ -359,8 +358,7 @@ static int* S3DE_getLine(int x1,int y1, int x2,int y2){ //create a chain of coor
 
 		//error case
 		if(line == NULL){
-			printf("FATAL ERROR > S3DE.c : S3DE_getLine() : ");
-			printf("Computer refuses to give more memory.\n");
+			printf("FATAL ERROR > S3DE.c : S3DE_getLine() : Computer refuses to give more memory.\n");
 			exit(EXIT_FAILURE);
 		}
 
@@ -376,8 +374,7 @@ static int* S3DE_getLine(int x1,int y1, int x2,int y2){ //create a chain of coor
 
 		//error case
 		if(line == NULL){
-			printf("FATAL ERROR > S3DE.c : S3DE_getLine() : ");
-			printf("Computer refuses to give more memory.\n");
+			printf("FATAL ERROR > S3DE.c : S3DE_getLine() : Computer refuses to give more memory.\n");
 			exit(EXIT_FAILURE);
 		}
 
@@ -406,8 +403,7 @@ static int* S3DE_getLine(int x1,int y1, int x2,int y2){ //create a chain of coor
 
 		//error case
 		if(line == NULL){
-			printf("FATAL ERROR > S3DE.c : S3DE_getLine() : ");
-			printf("Computer refuses to give more memory.\n");
+			printf("FATAL ERROR > S3DE.c : S3DE_getLine() : Computer refuses to give more memory.\n");
 			exit(EXIT_FAILURE);
 		}
 
@@ -509,8 +505,7 @@ void S3DE_addPlak(
 
 	//error case
 	if(p == NULL){
-		printf("FATAL ERROR > S3DE.c : S3DE_addPlak() : ");
-		printf("Computer refuses to give more memory.\n");
+		printf("FATAL ERROR > S3DE.c : S3DE_addPlak() : Computer refuses to give more memory.\n");
 		exit(EXIT_FAILURE);
 	}
 
@@ -532,8 +527,7 @@ void S3DE_addPlak(
 
 void S3DE_delPlak(int index){
 	if(index < 0 || index >= S3DE_plaksNbr){
-		printf("RUNTIME ERROR > S3DE.c : S3DE_delPlak() : ");
-		printf("Incorrect plak index \"%i\".\n", index);
+		printf("RUNTIME ERROR > S3DE.c : S3DE_delPlak() : Incorrect plak index \"%i\".\n", index);
 		return;
 	}
 
@@ -570,8 +564,7 @@ void S3DE_delPlak(int index){
 plak* S3DE_getPlak(int index){
 	//error cases
 	if(index < 0 || index >= S3DE_plaksNbr){
-		printf("RUNTIME ERROR > S3DE.c : S3DE_getPlak() : ");
-		printf("Incorrect plak index \"%i\".\n", index);
+		printf("RUNTIME ERROR > S3DE.c : S3DE_getPlak() : Incorrect plak index \"%i\".\n", index);
 		return NULL;
 	}
 
@@ -598,13 +591,11 @@ plak* S3DE_getPlak(int index){
 static int S3DE_strcmpN(char* s1, char* s2, int N){
 	//error cases
 	if(s1 == NULL || s2 == NULL){
-		printf("RUNTIME ERROR > S3DE.c : S3DE_strcmpN() : ");
-		printf("At least one string is NULL.\n");
+		printf("RUNTIME ERROR > S3DE.c : S3DE_strcmpN() : At least one string is NULL.\n");
 		return 0;
 	}
 	if(strlen(s1) < N || strlen(s2) < N){
-		printf("RUNTIME ERROR > S3DE.c : S3DE_strcmpN() : ");
-		printf("At least one string is too short (\"%s\" & \"%s\", %i characters needed).\n", s1,s2, N);
+		printf("RUNTIME ERROR > S3DE.c : S3DE_strcmpN() : At least one string is too short (\"%s\" & \"%s\", %i characters needed).\n", s1,s2, N);
 		return 0;
 	}
 
@@ -618,22 +609,19 @@ static int S3DE_strcmpN(char* s1, char* s2, int N){
 void S3DE_addPlaksFromSTL(char* fileName, int dx,int dy,int dz, int color){
 	//debug message
 	#ifdef DEBUG_ON
-	printf("DEBUG > S3DE.c : S3DE_addPlaksFromSTL() : ");
-	printf("Starting adding plaks from STL file \"%s\"...\n", fileName);
+	printf("DEBUG > S3DE.c : S3DE_addPlaksFromSTL() : Starting adding plaks from STL file \"%s\"...\n", fileName);
 	#endif
 
 	//error case
 	if(fileName == NULL){
-		printf("RUNTIME ERROR > S3DE.c : S3DE_addPlaksFromSTL() : ");
-		printf("Unable to add plaks, file name is NULL.\n");
+		printf("RUNTIME ERROR > S3DE.c : S3DE_addPlaksFromSTL() : Unable to add plaks, file name is NULL.\n");
 		return;
 	}
 
 	//file management
 	FILE* f = fopen(fileName,"r");
 	if(f == NULL){
-		printf("RUNTIME ERROR > S3DE.c : S3DE_addPlaksFromSTL() : ");
-		printf("No file \"%s\" found.\n",fileName);
+		printf("RUNTIME ERROR > S3DE.c : S3DE_addPlaksFromSTL() : No file \"%s\" found.\n",fileName);
 		return;
 	}
 
@@ -642,15 +630,13 @@ void S3DE_addPlaksFromSTL(char* fileName, int dx,int dy,int dz, int color){
 	int file_len = ftell(f);
 	fseek(f, 0L, SEEK_SET); //<=> rewind(f);
 	#ifdef DEBUG_ON
-	printf("DEBUG > S3DE.c : S3DE_addPlaksFromSTL() : ");
-	printf("File length : %i\n", file_len);
+	printf("DEBUG > S3DE.c : S3DE_addPlaksFromSTL() : File length : %i\n", file_len);
 	#endif
 
 	//init text buffer
 	char* text = malloc(file_len+1);
 	if(text == NULL){
-		printf("RUNTIME ERROR > S3DE.c : S3DE_addPlaksFromSTL() : ");
-		printf("Computer refuses to give more memory.\n");
+		printf("RUNTIME ERROR > S3DE.c : S3DE_addPlaksFromSTL() : Computer refuses to give more memory.\n");
 		return;
 	}
 	for(int c=0; c < file_len; c++)
@@ -661,8 +647,7 @@ void S3DE_addPlaksFromSTL(char* fileName, int dx,int dy,int dz, int color){
 	temp+=fscanf(f,"%[^!]", text);
 	fclose(f);
 	if(text == NULL){
-		printf("RUNTIME ERROR > S3DE.c : S3DE_addPlaksFromSTL() : ");
-		printf("File \"%s\" has no text.\n",fileName);
+		printf("RUNTIME ERROR > S3DE.c : S3DE_addPlaksFromSTL() : File \"%s\" has no text.\n",fileName);
 		return;
 	}
 
@@ -673,13 +658,12 @@ void S3DE_addPlaksFromSTL(char* fileName, int dx,int dy,int dz, int color){
 	float x1=0; float y1=0; float z1=0;
 	float x2=0; float y2=0; float z2=0;
 	float x3=0; float y3=0; float z3=0;
-	char* current = malloc(2);
+	char current[2];
 	current[0] = '\0';
 	current[1] = '\0';
 	char* floatText = malloc(S3DE_TEXT_FOR_FLOAT);
 	if(floatText == NULL){
-		printf("RUNTIME ERROR > S3DE.c : S3DE_addPlaksFromSTL() : ");
-		printf("Computer refuses to give more memory.\n");
+		printf("RUNTIME ERROR > S3DE.c : S3DE_addPlaksFromSTL() : Computer refuses to give more memory.\n");
 		return;
 	}
 	for(int c=0; c < S3DE_TEXT_FOR_FLOAT; c++)
@@ -689,8 +673,7 @@ void S3DE_addPlaksFromSTL(char* fileName, int dx,int dy,int dz, int color){
 	for(int c=0; c < file_len; c++){
 		if(text[c] == '\n'){ //analyse line (from text[line_start] until text[c-1] included)
 			#ifdef DEEP_DEBUG_ON
-			printf("DEEP DEBUG > S3DE.c : S3DE_addPlaksFromSTL() : ");
-			printf("Analysing line \"");
+			printf("DEEP DEBUG > S3DE.c : S3DE_addPlaksFromSTL() : Analysing line \"");
 			for(int i=line_start; i < c; i++)
 				printf("%c",text[i]);
 			printf("\"\n");
@@ -699,8 +682,7 @@ void S3DE_addPlaksFromSTL(char* fileName, int dx,int dy,int dz, int color){
 			//start plak registration
 			if(S3DE_strcmpN(text+line_start,"  outer loop",12)){
 				#ifdef DEEP_DEBUG_ON
-				printf("DEEP DEBUG > S3DE.c : S3DE_addPlaksFromSTL() : ");
-				printf("Found plak\n");
+				printf("DEEP DEBUG > S3DE.c : S3DE_addPlaksFromSTL() : Found plak\n");
 				#endif
 
 				vertexNbr = 1;
@@ -708,8 +690,7 @@ void S3DE_addPlaksFromSTL(char* fileName, int dx,int dy,int dz, int color){
 			else if(S3DE_strcmpN(text+line_start,"  vertex ",9)){
 				//debug message
 				#ifdef DEEP_DEBUG_ON
-				printf("DEEP DEBUG > S3DE.c : S3DE_addPlaksFromSTL() : ");
-				printf("Adding point %i.\n",vertexNbr);
+				printf("DEEP DEBUG > S3DE.c : S3DE_addPlaksFromSTL() : Adding point %i.\n", vertexNbr);
 				#endif
 
 				switch(vertexNbr){
@@ -722,8 +703,7 @@ void S3DE_addPlaksFromSTL(char* fileName, int dx,int dy,int dz, int color){
 							*current = text[line_start+i];
 
 							#ifdef DEEP_DEBUG_ON
-							printf("DEEP DEBUG > S3DE.c : S3DE_addPlaksFromSTL() : ");
-							printf("floatText : %s.\n", floatText);
+							printf("DEEP DEBUG > S3DE.c : S3DE_addPlaksFromSTL() : floatText : %s.\n", floatText);
 							#endif
 
 							if(*current == ' ' || *current == '\n'){
@@ -761,8 +741,7 @@ void S3DE_addPlaksFromSTL(char* fileName, int dx,int dy,int dz, int color){
 							*current = text[line_start+i];
 
 							#ifdef DEEP_DEBUG_ON
-							printf("DEEP DEBUG > S3DE.c : S3DE_addPlaksFromSTL() : ");
-							printf("floatText : %s.\n", floatText);
+							printf("DEEP DEBUG > S3DE.c : S3DE_addPlaksFromSTL() : floatText : %s.\n", floatText);
 							#endif
 
 							if(*current == ' ' || *current == '\n'){
@@ -799,8 +778,7 @@ void S3DE_addPlaksFromSTL(char* fileName, int dx,int dy,int dz, int color){
 							*current = text[line_start+i];
 
 							#ifdef DEEP_DEBUG_ON
-							printf("DEEP DEBUG > S3DE.c : S3DE_addPlaksFromSTL() : ");
-							printf("floatText : %s.\n", floatText);
+							printf("DEEP DEBUG > S3DE.c : S3DE_addPlaksFromSTL() : floatText : %s.\n", floatText);
 							#endif
 
 							if(*current == ' ' || *current == '\n'){
@@ -861,29 +839,25 @@ void S3DE_addPlaksFromSTL(char* fileName, int dx,int dy,int dz, int color){
 	}
 
 	//free file & analysis data
-	free(current);
 	free(text);
 
 	//debug message
 	#ifdef DEBUG_ON
-	printf("DEBUG > S3DE.c : S3DE_addPlaksFromSTL() : ");
-	printf("Successfully added plaks from STL file \"%s\" !\n", fileName);
+	printf("DEBUG > S3DE.c : S3DE_addPlaksFromSTL() : Successfully added plaks from STL file \"%s\" !\n", fileName);
 	#endif
 }
 
 void S3DE_saveSTLfromPlaks(char* fileName){
 	//error case
 	if(fileName == NULL){
-		printf("RUNTIME ERROR > S3DE.c : S3DE_saveSTLfromPlaks() : ");
-		printf("Unable to export plaks, file name is NULL.\n");
+		printf("RUNTIME ERROR > S3DE.c : S3DE_saveSTLfromPlaks() : Unable to export plaks, file name is NULL.\n");
 		return;
 	}
 
 	//file management
 	FILE* f = fopen(fileName,"w");
 	if(f == NULL){
-		printf("RUNTIME ERROR > S3DE.c : S3DE_saveSTLfromPlaks() : ");
-		printf("Unable to create or edit file \"%s\".\n",fileName);
+		printf("RUNTIME ERROR > S3DE.c : S3DE_saveSTLfromPlaks() : Unable to create or edit file \"%s\".\n", fileName);
 		return;
 	}
 
@@ -933,8 +907,7 @@ void S3DE_saveSTLfromPlaks(char* fileName){
 
 	//debug message
 	#ifdef DEBUG_ON
-	printf("DEBUG > S3DE.c : S3DE_saveSTLfromPlaks() : ");
-	printf("Plaks have been exported into \"%s\".\n", fileName);
+	printf("DEBUG > S3DE.c : S3DE_saveSTLfromPlaks() : Plaks have been exported into \"%s\".\n", fileName);
 	#endif
 }
 
@@ -1022,8 +995,7 @@ static void S3DEL_display(){
 	}
 
 	#ifdef DEBUG_ON
-	printf("DEBUG > S3DE.c : S3DE_display() : ");
-	printf("%i/%i plaks rendered.\n",renderedNbr,S3DE_plaksNbr);
+	printf("DEBUG > S3DE.c : S3DE_display() : %i/%i plaks rendered.\n",renderedNbr,S3DE_plaksNbr);
 	#endif
 
 	//3D screen displaying
@@ -1105,6 +1077,10 @@ static void S3DEL_reshape(int newWidth,int newHeight){
 	free(S3DE_depthBuffer);
 	S3DE_colorBuffer = malloc(S3DE_width*S3DE_height*4);
 	S3DE_depthBuffer = malloc(S3DE_width*S3DE_height*4);
+	if(S3DE_colorBuffer == NULL || S3DE_depthBuffer == NULL){
+		printf("FATAL ERROR > S3DE.c : S3DE_addPlaksFromSTL() : Computer refuses to give more memory.\n");
+		exit(EXIT_FAILURE);
+	}
 
 	//set buffer default values
 	int index=0;
@@ -1246,8 +1222,7 @@ void S3DE_text(char* text, float size, float x,float y){
 
 	//error case
 	if(text == NULL){
-		printf("RUNTIME ERROR > S3DE.c : S3DE_text() : ");
-		printf("Text is NULL.\n");
+		printf("RUNTIME ERROR > S3DE.c : S3DE_text() : Text is NULL.\n");
 		return;
 	}
 
@@ -1301,8 +1276,7 @@ void S3DE_setTimer(int ms){
 void S3DE_init(int argc, char** argv, const char* name, unsigned int width,unsigned int height){
 	//error case
 	if(name == NULL){
-		printf("RUNTIME ERROR > S3DE.c : S3DE_init() : ");
-		printf("Cannot init window, name is NULL.\n");
+		printf("RUNTIME ERROR > S3DE.c : S3DE_init() : Cannot init window, name is NULL.\n");
 		return;
 	}
 
@@ -1344,8 +1318,7 @@ void S3DE_init(int argc, char** argv, const char* name, unsigned int width,unsig
 
 	//error cases
 	if(S3DE_colorBuffer == NULL || S3DE_depthBuffer == NULL){
-		printf("RUNTIME ERROR > S3DE.c : S3DE_init() : ");
-		printf("Computer refuses to give memory for colorBuffer or depthBuffer.\n");
+		printf("RUNTIME ERROR > S3DE.c : S3DE_init() : Computer refuses to give memory for colorBuffer or depthBuffer.\n");
 		return;
 	}
 
@@ -1360,8 +1333,7 @@ void S3DE_init(int argc, char** argv, const char* name, unsigned int width,unsig
 
 	#ifdef DEBUG_ON
 	//show the number of plaks loaded in scene
-	printf("DEBUG > S3DE.c : S3DE_init() : ");
-	printf("%i plaks loaded.\n",S3DE_plaksNbr);
+	printf("DEBUG > S3DE.c : S3DE_init() : %i plaks loaded.\n",S3DE_plaksNbr);
 	#endif
 
 	//set local S3DE event handlers (S3DEL)

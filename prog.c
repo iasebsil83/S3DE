@@ -402,7 +402,7 @@ void S3DE_event(int event){
 
 // ---------------- EXECUTION ----------------
 
-// ---- main ----
+//main
 int main(int argc, char** argv){
 
 	//init S3DE

@@ -201,6 +201,12 @@ enum S3DE_EVENTS{
 
 
 
+//2D graphics
+#define S3DE_EMPTY  0
+#define S3DE_FILLED 1
+
+
+
 //3D constants
 #define S3DE_RENDER_DISTANCE 1000000000 //in pixels
 #define S3DE_SKYCOLOR 16777215          //RGBA color corresponding to (0,255,255,255) (perfect cyan)
