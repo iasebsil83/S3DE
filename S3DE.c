@@ -2,13 +2,9 @@
 
 //openGL compatibility
 #ifdef __APPLE__
-	#include <OpenGL/gl.h>
-	#include <OpenGL/CGLMacro.h>
 	#include <GLUT/glut.h>
 #else
 	#include <glut.h>
-	#include <X11/Xlib.h>
-	#include <GL/glx.h>
 #endif
 
 
@@ -16,6 +12,7 @@
 //standard
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <math.h>
 #include <float.h>
 #include <string.h>
@@ -36,7 +33,7 @@
 
 
 
-/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ S3DE [0.1.6] ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ S3DE [0.1.7] ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                             Simple 3Dimensional Engine
 
     Developped using freeglut3 (or just GLUT), a graphical 2D/3D engine.
@@ -95,6 +92,10 @@
     - Added keyreleased events.
     - Changed example program.
 
+    22/03/2021 > [0.1.7] :
+    - Added S3DE_MOUSE_SCROLL event.
+    - Removed some useless importations.
+
     BUGS : S3DE_goStraight() is temporarily broken, however an alternative
                is made in S3DE_real().
     NOTES : S3DE_addPlaksFromSTL() temporary colors plaks in 2 colors :
@@ -147,12 +148,12 @@
 // ---------------- INITIALIZATION ----------------
 
 //global vars
-static int S3DE_window = -1;
-static int S3DE_timedExecution_delay = -1;
-static int S3DE_width_2  = 0;
-static int S3DE_height_2 = 0;
-static int* S3DE_colorBuffer = NULL;
-static float* S3DE_depthBuffer = NULL;
+static int S3DE_window               =   -1;
+static int S3DE_timedExecution_delay =   -1;
+static int S3DE_width_2              =    0;
+static int S3DE_height_2             =    0;
+static int* S3DE_colorBuffer         = NULL;
+static float* S3DE_depthBuffer       = NULL;
 
 
 
@@ -187,16 +188,17 @@ static plak* S3DE_plaks = NULL;
 
 
 //event variables
-int S3DE_mouseState  = 0; //mouse
-int S3DE_mouseButton = 0;
-int S3DE_mouseX      = 0;
-int S3DE_mouseY      = 0;
-int S3DE_keyState       = 0; //keyboard
-unsigned short S3DE_key = 0;
+int S3DE_mouseState         = 0; //mouse
+int S3DE_mouseButton        = 0;
+int S3DE_mouseScroll        = 0;
+int S3DE_mouseX             = 0;
+int S3DE_mouseY             = 0;
+int S3DE_keyState           = 0; //keyboard
+unsigned short S3DE_key     = 0;
 unsigned int S3DE_newWidth  = 0; //resize
 unsigned int S3DE_newHeight = 0;
-unsigned int S3DE_width  = 0;
-unsigned int S3DE_height = 0;
+unsigned int S3DE_width     = 0;
+unsigned int S3DE_height    = 0;
 
 //event handler
 extern void S3DE_event(int event);
@@ -1044,14 +1046,28 @@ static void S3DEL_mouseButton(int button, int state, int x,int y){
 	S3DE_mouseX = x;
 	S3DE_mouseY = S3DE_height - y;
 	S3DE_mouseState = state;
-	S3DE_mouseButton = button;
-	S3DE_event(S3DE_MOUSECLICK);
+
+	//scroll
+	if(button == 3 || button == 4){
+		if(state == S3DE_MOUSE_PRESSED){
+			S3DE_mouseScroll = button;
+			S3DE_event(S3DE_MOUSE_SCROLL);
+		}
+	}else{
+		S3DE_mouseButton = button;
+		S3DE_event(S3DE_MOUSE_CLICK);
+	}
 }
 
 static void S3DEL_mouseMoved(int x,int y){
 	S3DE_mouseX = x;
 	S3DE_mouseY = S3DE_height - y;
-	S3DE_event(S3DE_MOUSEMOVE);
+	usleep(1);
+	if(S3DE_mouseScroll == 0){
+		S3DE_event(S3DE_MOUSE_MOVE);
+	}else{
+		S3DE_mouseScroll = 0;
+	}
 }
 
 

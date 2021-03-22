@@ -70,7 +70,7 @@
 
 // ---------------- DECLARATIONS ----------------
 
-// ---- S3DE shared variables ----
+//S3DE shared variables
 extern unsigned int S3DE_width;
 extern unsigned int S3DE_height;
 extern int S3DE_keyState;
@@ -78,13 +78,14 @@ extern unsigned short S3DE_key;
 extern int S3DE_mouseX;
 extern int S3DE_mouseY;
 extern int S3DE_mouseButton;
+extern int S3DE_mouseScroll;
 extern int S3DE_mouseState;
 extern xyz S3DE_position;
 extern float S3DE_FOV;
 
 
 
-// ---- global vars ----
+//global vars
 float angleStep = 0.1;
 int positionStep = 50;
 float FOVstep = 0.0001;
@@ -174,7 +175,7 @@ void buildScene(){
 
 // ---------------- EVENTS ----------------
 
-// ---- event handlers ----
+//event handlers
 void S3DE_event(int event){
 	switch(event){
 
@@ -315,7 +316,7 @@ void S3DE_event(int event){
 			}
 		break;
 
-		case S3DE_MOUSECLICK:
+		case S3DE_MOUSE_CLICK:
 			if(S3DE_mouseState == S3DE_MOUSE_RELEASED) //get only "mouse pressed" events
 				break;
 
@@ -332,7 +333,18 @@ void S3DE_event(int event){
 			}
 		break;
 
-		case S3DE_MOUSEMOVE:
+		case S3DE_MOUSE_MOVE:
+		break;
+
+		case S3DE_MOUSE_SCROLL:
+			switch(S3DE_mouseScroll){
+				case S3DE_SCROLL_UP:
+					printf("Scrolling up at (%i,%i)\n", S3DE_mouseX,S3DE_mouseY);
+				break;
+				case S3DE_SCROLL_DOWN:
+					printf("Scrolling down at (%i,%i)\n", S3DE_mouseX,S3DE_mouseY);
+				break;
+			}
 		break;
 
 		case S3DE_TIMER:
@@ -420,7 +432,7 @@ int main(int argc, char** argv){
 	S3DE_position.z = -1150;
 
 	//launch S3DE
-	printf("Starting S3DE [0.1.6]\n");
+	printf("Starting S3DE [0.1.7]\n");
 	S3DE_start();
 
 	return EXIT_SUCCESS;

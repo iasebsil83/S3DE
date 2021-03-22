@@ -12,6 +12,14 @@
 
 
 
+
+
+
+
+
+
+
+
 // ---------------- DECLARATIONS ----------------
 
 //keyboard constants
@@ -183,8 +191,9 @@ enum S3DE_KEYS{
 //event constants
 enum S3DE_EVENTS{
 	S3DE_KEYBOARD,
-	S3DE_MOUSECLICK,
-	S3DE_MOUSEMOVE,
+	S3DE_MOUSE_CLICK,
+	S3DE_MOUSE_MOVE,
+	S3DE_MOUSE_SCROLL,
 	S3DE_DISPLAY,
 	S3DE_RESIZE,
 	S3DE_TIMER
@@ -198,6 +207,8 @@ enum S3DE_EVENTS{
 #define S3DE_LEFT_BUTTON    0x0000
 #define S3DE_MIDDLE_BUTTON  0x0001
 #define S3DE_RIGHT_BUTTON   0x0002
+#define S3DE_SCROLL_UP      0x0003
+#define S3DE_SCROLL_DOWN    0x0004
 
 
 
