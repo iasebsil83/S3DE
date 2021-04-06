@@ -33,6 +33,14 @@
 
 
 
+
+
+
+
+
+
+
+
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ S3DE [0.1.7] ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                             Simple 3Dimensional Engine
 
@@ -96,18 +104,26 @@
     - Added S3DE_MOUSE_SCROLL event.
     - Removed some useless importations.
 
-    BUGS : S3DE_goStraight() is temporarily broken, however an alternative
-               is made in S3DE_real().
+    06/04/2021 > [0.1.8] :
+    - Started 3D forms patch (plane, cuboid, cube).
+    - Optimized render process with the implementation of S3DE_realPlaks.
+      (More memory management, less processor time).
+    - Partially fixed movement in S3DE_goStraight().
+
+    BUGS : S3DE_goStraight() is only working in the basic 3D axes.
     NOTES : S3DE_addPlaksFromSTL() temporary colors plaks in 2 colors :
                 - half the time in the given color
                 - half the time in its oposite
-            Uncomment definition of S3DE_STL_BICOLOR_ENABLE to disable it.
+            (Uncomment definition of S3DE_STL_BICOLOR_ENABLE to disable it.)
+            This is also the case for S3DE_addPlaks_plane(),
+                                      S3DE_addPlaks_cuboid()
+                                      S3DE_addPlaks_cube()
 
-    S2DE is now compatible with another library I made
+    S3DE is now compatible with another library I made
     for PNG image manipulation : PNG.c/.h.
     It is available here :
             https://github.com/iasebsil83/C_PNG
-    Use S2DE_imageRGBA() to draw image on screen.
+    Use S3DE_imageRGBA() to draw image on screen.
 
     Contact     : i.a.sebsil83@gmail.com
     Youtube     : https://www.youtube.com/user/IAsebsil83
@@ -145,6 +161,14 @@
 
 
 
+
+
+
+
+
+
+
+
 // ---------------- INITIALIZATION ----------------
 
 //global vars
@@ -153,7 +177,7 @@ static int S3DE_timedExecution_delay =   -1;
 static int S3DE_width_2              =    0;
 static int S3DE_height_2             =    0;
 static int* S3DE_colorBuffer         = NULL;
-static float* S3DE_depthBuffer       = NULL;
+static double* S3DE_depthBuffer      = NULL;
 
 
 
@@ -166,24 +190,31 @@ static float* S3DE_depthBuffer       = NULL;
 
 
 //basic attributes
-static float S3DE_angleX = 0.0;
-static float S3DE_angleY = 0.0;
-static float S3DE_cosX   = 0.0;
-static float S3DE_sinX   = 0.0;
-static float S3DE_cosY   = 0.0;
-static float S3DE_sinY   = 0.0;
+static double S3DE_angleX = 0.0;
+static double S3DE_angleY = 0.0;
+static double S3DE_cosX   = 0.0;
+static double S3DE_sinX   = 0.0;
+static double S3DE_cosY   = 0.0;
+static double S3DE_sinY   = 0.0;
 xyz S3DE_position = {
 	.x = 0.0,
 	.y = 0.0,
 	.z = 0.0
 };
-float S3DE_FOV = 0.001;
+double S3DE_FOV = 0.0007;
 
 
 
-//plaks
-static int S3DE_plaksNbr = 0;
-static plak* S3DE_plaks = NULL;
+//3D plaks (linked list)
+struct PLAK{
+	xyz points[3];
+	int color;
+	struct PLAK* next;
+};
+typedef struct PLAK plak;
+static int S3DE_plaksNbr    = 0;
+static plak* S3DE_plaks     = NULL; //plaks of the scene
+static plak* S3DE_realPlaks = NULL; //same plaks with space rotation + position offset
 
 
 
@@ -214,18 +245,26 @@ extern void S3DE_event(int event);
 
 
 
+
+
+
+
+
+
+
+
 // ---------------- 3D ENGINE ----------------
 
 //space rotations & movements
-float S3DE_getAngleX(){
+double S3DE_getAngleX(){
 	return S3DE_angleX;
 }
 
-float S3DE_getAngleY(){
+double S3DE_getAngleY(){
 	return S3DE_angleY;
 }
 
-void S3DE_addAngleX(float angle){
+void S3DE_addAngleX(double angle){
 	S3DE_angleX += angle;
 
 	//recalculate cos & sin
@@ -233,7 +272,7 @@ void S3DE_addAngleX(float angle){
 	S3DE_sinX = sin(S3DE_angleX);
 }
 
-void S3DE_addAngleY(float angle){
+void S3DE_addAngleY(double angle){
 	S3DE_angleY += angle;
 
 	//recalculate cos & sin
@@ -241,50 +280,33 @@ void S3DE_addAngleY(float angle){
 	S3DE_sinY = sin(S3DE_angleY);
 }
 
-void S3DE_goStraight(float distance, char direction){
+void S3DE_goStraight(double step, char direction){
 	switch(direction){
+
+		//front - back
 		case S3DE_FRONT:
-			//temporarily broken
-			//S3DE_position.x += distance*S3DE_sinY;
-			//S3DE_position.y += distance*S3DE_cosY*S3DE_sinX;
-			//S3DE_position.z += distance*S3DE_cosY*S3DE_cosX;
-			S3DE_position.z += distance;
+			S3DE_position.z += step;
 		break;
 		case S3DE_BACK:
-			//temporarily broken
-			//S3DE_position.x -= distance*S3DE_sinY;
-			//S3DE_position.y -= distance*S3DE_cosY*S3DE_sinX;
-			//S3DE_position.z -= distance*S3DE_cosY*S3DE_cosX;
-			S3DE_position.z -= distance;
+			S3DE_position.z -= step;
 		break;
+
+		//left - right
 		case S3DE_LEFT:
-			//temporarily broken
-			//S3DE_position.x -= distance*S3DE_cosY;
-			//S3DE_position.y += distance*S3DE_sinY*S3DE_sinX;
-			//S3DE_position.z += distance*S3DE_sinY*S3DE_cosX;
-			S3DE_position.x -= distance;
+			S3DE_position.x -= step;
 		break;
 		case S3DE_RIGHT:
-			//temporarily broken
-			//S3DE_position.x += distance*S3DE_cosY;
-			//S3DE_position.y -= distance*S3DE_sinY*S3DE_sinX;
-			//S3DE_position.z -= distance*S3DE_sinY*S3DE_cosX;
-			S3DE_position.x += distance;
+			S3DE_position.x += step;
 		break;
+
+		//up - down
 		case S3DE_UP:
-			//temporarily broken
-			//S3DE_position.x -= distance*S3DE_cosY;
-			//S3DE_position.y += distance*S3DE_sinY*S3DE_cosX;
-			//S3DE_position.z -= distance*S3DE_sinY*S3DE_sinX;
-			S3DE_position.y += distance;
+			S3DE_position.y += step;
 		break;
 		case S3DE_DOWN:
-			//temporarily broken
-			//S3DE_position.x += distance*S3DE_cosY;
-			//S3DE_position.y -= distance*S3DE_sinY*S3DE_cosX;
-			//S3DE_position.z += distance*S3DE_sinY*S3DE_sinX;
-			S3DE_position.y -= distance;
+			S3DE_position.y -= step;
 		break;
+
 		default:
 			printf("RUNTIME ERROR > S3DE.c : S3DE_goStraight() : Unknown direction \"%i\".\n", (int)direction);
 	}
@@ -294,16 +316,11 @@ void S3DE_goStraight(float distance, char direction){
 
 //render engine
 static xyz S3DE_real(xyz point){
-	//centralizing to (0,0,0) from S3DE_position
-	//temporarily broken
-	//point.x -= S3DE_position.x;
-	//point.y -= S3DE_position.y;
-	//point.z -= S3DE_position.z;
 
 	//temporary variables
-	float x = point.x;
-	float y = point.y;
-	float z = point.z;
+	double x = point.x;
+	double y = point.y;
+	double z = point.z;
 
 	//y rotation build
 	point.x = z*S3DE_sinY + x*S3DE_cosY;
@@ -313,44 +330,70 @@ static xyz S3DE_real(xyz point){
 	point.y = z*S3DE_sinX + y*S3DE_cosX;
 	point.z = z*S3DE_cosX - y*S3DE_sinX;
 
-	//S3DE_goStraight() alternative
-	point.x -= S3DE_position.x;
-	point.y -= S3DE_position.y;
-	point.z -= S3DE_position.z;
-
 	//perspective
 	if(point.z > 0){
-		float FOVcoef = expf(-S3DE_FOV*point.z);
+		double FOVcoef = expf(-S3DE_FOV*point.z);
 
 		//x
 		if(point.x > S3DE_width_2)
-			point.x = (float)S3DE_width_2 + FOVcoef*(point.x-S3DE_width_2);
+			point.x = (double)S3DE_width_2 + FOVcoef*(point.x-S3DE_width_2);
 		else if(point.x < S3DE_width_2)
-			point.x = (float)S3DE_width_2 - FOVcoef*(S3DE_width_2-point.x);
+			point.x = (double)S3DE_width_2 - FOVcoef*(S3DE_width_2-point.x);
 
 		//y
 		if(point.y > S3DE_height_2)
-			point.y = (float)S3DE_height_2 + FOVcoef*(point.y-S3DE_height_2);
+			point.y = (double)S3DE_height_2 + FOVcoef*(point.y-S3DE_height_2);
 		else if(point.y < S3DE_height_2)
-			point.y = (float)S3DE_height_2 - FOVcoef*(S3DE_height_2-point.y);
+			point.y = (double)S3DE_height_2 - FOVcoef*(S3DE_height_2-point.y);
 	}
 
 	return point;
 }
 
-static float S3DE_getRealZ(xyz p[3], int x,int y){ //get the z corresponding to the point (x,y,?) of the plak
-	//                                             //with x and y as real coordinates on the screen
-	//                                                                                                         ------->   ------->
-	float a = (p[1].y - p[0].y)*(p[2].z - p[0].z) - (p[1].z - p[0].z)*(p[2].y - p[0].y); //vectorial product : p[0]p[1] ^ p[0]p[2]
-	float b = (p[2].x - p[0].x)*(p[1].z - p[0].z) - (p[2].z - p[0].z)*(p[1].x - p[0].x);
-	float c = (p[1].x - p[0].x)*(p[2].y - p[0].y) - (p[1].y - p[0].y)*(p[2].x - p[0].x);
-	float d = -(a*p[0].x + b*p[0].y + c*p[0].z);           //p[0] belongs to the plan
+static void S3DE_realAllPlaks(){
+	plak* currentP  = S3DE_plaks;
+	plak* currentRP = S3DE_realPlaks;
+	for(int p=0; p < S3DE_plaksNbr; p++){
+
+		//set current shifted plak points
+		//1st point
+		currentRP->points[0].x = currentP->points[0].x - S3DE_position.x;
+		currentRP->points[0].y = currentP->points[0].y - S3DE_position.y;
+		currentRP->points[0].z = currentP->points[0].z - S3DE_position.z;
+		currentRP->points[0] = S3DE_real(currentRP->points[0]);
+
+		//2nd point
+		currentRP->points[1].x = currentP->points[1].x - S3DE_position.x;
+		currentRP->points[1].y = currentP->points[1].y - S3DE_position.y;
+		currentRP->points[1].z = currentP->points[1].z - S3DE_position.z;
+		currentRP->points[1] = S3DE_real(currentRP->points[1]);
+
+		//3rd point
+		currentRP->points[2].x = currentP->points[2].x - S3DE_position.x;
+		currentRP->points[2].y = currentP->points[2].y - S3DE_position.y;
+		currentRP->points[2].z = currentP->points[2].z - S3DE_position.z;
+		currentRP->points[2] = S3DE_real(currentRP->points[2]);
+
+		//set next plak as current
+		currentP  = currentP->next;
+		currentRP = currentRP->next;
+	}
+}
+
+static double S3DE_getRealZ(xyz p[3], int x,int y){ //get the z corresponding to the point (x,y,?) of the plak
+	//                                              //with x and y as real coordinates on the screen
+	//                                                                                                          ------->   ------->
+	double a = (p[1].y - p[0].y)*(p[2].z - p[0].z) - (p[1].z - p[0].z)*(p[2].y - p[0].y); //vectorial product : p[0]p[1] ^ p[0]p[2]
+	double b = (p[2].x - p[0].x)*(p[1].z - p[0].z) - (p[2].z - p[0].z)*(p[1].x - p[0].x);
+	double c = (p[1].x - p[0].x)*(p[2].y - p[0].y) - (p[1].y - p[0].y)*(p[2].x - p[0].x);
+	double d = -(a*p[0].x + b*p[0].y + c*p[0].z); //p[0] belongs to the plan
+
 	//so we have plan's equation : a*x + b*y + c*z + d = 0 (useful to find the z corresponding to an x and y)
 	return -1.0*(a*x + b*y + d)/c;
 }
 
 static int* S3DE_getLine(int x1,int y1, int x2,int y2){ //create a chain of coordinates following the patern :
-	//get differences in x and y                        //    int 0 : chain length
+	//get differences in x and y                        //    int 0   : chain length
 	int difX = abs(x2-x1);                              //    int 1,2 : x and y coordinates of first pixel
 	int difY = abs(y2-y1);                              //    int 3,4 : x and y coordinates of second pixel ...
 
@@ -385,9 +428,9 @@ static int* S3DE_getLine(int x1,int y1, int x2,int y2){ //create a chain of coor
 
 		//init line vars
 		int x   = x1;
-		float y = y1;
-		float stepX = (x2 > x1) ? 1 : -1;
-		float stepY = (float)(y2-y1)/difX; //not using difY : sign is important !
+		double y = y1;
+		double stepX = (x2 > x1) ? 1 : -1;
+		double stepY = (double)(y2-y1)/difX; //not using difY : sign is important !
 
 		//for each coordinate
 		for(int p=0; p < difX; p++){
@@ -413,10 +456,10 @@ static int* S3DE_getLine(int x1,int y1, int x2,int y2){ //create a chain of coor
 		line[0] = difY;
 
 		//init line vars
-		float x = x1;
+		double x = x1;
 		int y   = y1;
-		float stepX = (float)(x2-x1)/difY; //not using difY : sign is important !
-		float stepY = (y2 > y1) ? 1 : -1;
+		double stepX = (double)(x2-x1)/difY; //not using difY : sign is important !
+		double stepY = (y2 > y1) ? 1 : -1;
 
 		//for each coordinate
 		for(int p=0; p < difY; p++){
@@ -432,17 +475,11 @@ static int* S3DE_getLine(int x1,int y1, int x2,int y2){ //create a chain of coor
 	return NULL; //unreachable code
 }
 
-static void S3DE_render(plak* p){
-	//get real points
-	xyz realPoints[3];
-	realPoints[0] = S3DE_real(p->points[0]);
-	realPoints[1] = S3DE_real(p->points[1]);
-	realPoints[2] = S3DE_real(p->points[2]);
-
+static void S3DE_renderPlak(plak* rp){ //triangle projection on screen made with lines
 	//get main line (the first one)
 	int* line_01 = S3DE_getLine(
-		realPoints[0].x, realPoints[0].y,
-		realPoints[1].x, realPoints[1].y
+		rp->points[0].x, rp->points[0].y,
+		rp->points[1].x, rp->points[1].y
 	);
 
 	//for each pixel in main line
@@ -450,8 +487,8 @@ static void S3DE_render(plak* p){
 	for(int i=0; i < line_01[0]; i++){
 		//get line from current pixel to third point
 		int* line_i2 = S3DE_getLine(
-			line_01[1+2*i] , line_01[2+2*i] ,
-			realPoints[2].x, realPoints[2].y
+			line_01[1+2*i],  line_01[2+2*i],
+			rp->points[2].x, rp->points[2].y
 		);
 
 		//for each pixel in current line
@@ -464,14 +501,14 @@ static void S3DE_render(plak* p){
 			if(S3DE_inScreen(jx,jy)){
 
 				//compare with currently stored in depth buffer
-				float newZ = S3DE_getRealZ(realPoints, jx,jy);
+				double newZ = S3DE_getRealZ(rp->points, jx,jy);
 				if(newZ > S3DE_BACKSCENE_LIMIT && newZ < S3DE_depthBuffer[ jy*S3DE_width + jx ]){
 
 					//set new depth at this coordinate
 					S3DE_depthBuffer[ jy*S3DE_width + jx ] = newZ;
 
 					//set new color at this coordinate
-					S3DE_colorBuffer[ jy*S3DE_width + jx ] = p->color;
+					S3DE_colorBuffer[ jy*S3DE_width + jx ] = rp->color;
 				}
 			}
 		}
@@ -495,75 +532,18 @@ static void S3DE_render(plak* p){
 
 
 
+
+
+
+
+
+
+
+
 // ---------------- PLAKS MANAGEMENT ----------------
-void S3DE_addPlak(
-	int x0,int y0,int z0,
-	int x1,int y1,int z1,
-	int x2,int y2,int z2,
-	int color //in RGBA format (see S3DE_setPixelRGBA())
-){
-	//create new plak
-	plak* p = malloc(sizeof(plak));
 
-	//error case
-	if(p == NULL){
-		printf("FATAL ERROR > S3DE.c : S3DE_addPlak() : Computer refuses to give more memory.\n");
-		exit(EXIT_FAILURE);
-	}
-
-	//set new plak
-	p->points[0].x = x0; p->points[0].y = y0; p->points[0].z = z0;
-	p->points[1].x = x1; p->points[1].y = y1; p->points[1].z = z1;
-	p->points[2].x = x2; p->points[2].y = y2; p->points[2].z = z2;
-	p->color = color;
-	p->next = NULL;
-
-	//add it to S3DE_plaks
-	if(S3DE_plaksNbr == 0) //this is the first plak
-		S3DE_plaks = p;
-	else
-		S3DE_getPlak(S3DE_plaksNbr-1)->next = p;
-
-	S3DE_plaksNbr++;
-}
-
-void S3DE_delPlak(int index){
-	if(index < 0 || index >= S3DE_plaksNbr){
-		printf("RUNTIME ERROR > S3DE.c : S3DE_delPlak() : Incorrect plak index \"%i\".\n", index);
-		return;
-	}
-
-	//first case
-	if(index == 0){
-		plak* newFirst;
-
-		//alone case
-		if(S3DE_plaksNbr == 1)
-			newFirst = NULL;
-		else
-			newFirst = S3DE_getPlak(1);
-
-		//free old first
-		free(S3DE_plaks);
-
-		//attach newFirst
-		S3DE_plaks = newFirst;
-
-	//other cases
-	}else{
-		plak* prevPlak = S3DE_getPlak(index-1);
-		plak* nextPlak = (prevPlak->next)->next;
-
-		//free indexed plak
-		free(prevPlak->next);
-
-		//attach nextPlak to prevPlak
-		prevPlak->next = nextPlak;
-	}
-	S3DE_plaksNbr--;
-}
-
-plak* S3DE_getPlak(int index){
+//basics
+static plak* S3DE_getPlak(int index){
 	//error cases
 	if(index < 0 || index >= S3DE_plaksNbr){
 		printf("RUNTIME ERROR > S3DE.c : S3DE_getPlak() : Incorrect plak index \"%i\".\n", index);
@@ -577,6 +557,118 @@ plak* S3DE_getPlak(int index){
 
 	return current;
 }
+
+static plak* S3DE_getRealPlak(int index){
+	//error cases
+	if(index < 0 || index >= S3DE_plaksNbr){
+		printf("RUNTIME ERROR > S3DE.c : S3DE_getRealPlak() : Incorrect plak index \"%i\".\n", index);
+		return NULL;
+	}
+
+	//get indexed plak
+	plak* current = S3DE_realPlaks;
+	for(int p=0; p < index; p++)
+		current = current->next;
+
+	return current;
+}
+
+void S3DE_addPlak(
+	double x0,double y0,double z0,
+	double x1,double y1,double z1,
+	double x2,double y2,double z2,
+	int color //in RGBA format (see S3DE_setPixelRGBA())
+){
+	//create new plak
+	plak* p  = malloc(sizeof(plak));
+	plak* rp = malloc(sizeof(plak));
+
+	//error case
+	if(p == NULL || rp == NULL){
+		printf("FATAL ERROR > S3DE.c : S3DE_addPlak() : Computer refuses to give more memory.\n");
+		exit(EXIT_FAILURE);
+	}
+
+	//set new plak
+	p->points[0].x = x0; p->points[0].y = y0; p->points[0].z = z0;
+	p->points[1].x = x1; p->points[1].y = y1; p->points[1].z = z1;
+	p->points[2].x = x2; p->points[2].y = y2; p->points[2].z = z2;
+	p->color = color;
+	p->next  = NULL;
+
+	//set new realPlak
+	rp->points[0].x = x0; rp->points[0].y = y0; rp->points[0].z = z0;
+	rp->points[1].x = x1; rp->points[1].y = y1; rp->points[1].z = z1;
+	rp->points[2].x = x2; rp->points[2].y = y2; rp->points[2].z = z2;
+	rp->color = color;
+	rp->next  = NULL;
+
+	//add it to S3DE_plaks
+	if(S3DE_plaksNbr == 0){ //this is the first plak
+		S3DE_plaks     =  p;
+		S3DE_realPlaks = rp;
+	}else{
+		S3DE_getPlak    (S3DE_plaksNbr-1)->next =  p;
+		S3DE_getRealPlak(S3DE_plaksNbr-1)->next = rp;
+	}
+
+	S3DE_plaksNbr++;
+}
+
+void S3DE_delPlak(int index){
+	//error cases
+	if(index < 0 || index >= S3DE_plaksNbr){
+		printf("RUNTIME ERROR > S3DE.c : S3DE_delPlak() : Incorrect plak index \"%i\".\n", index);
+		return;
+	}
+
+	//first case
+	if(index == 0){
+		plak* newFirst;
+		plak* newRealFirst;
+
+		//alone case
+		if(S3DE_plaksNbr == 1){
+			newFirst     = NULL;
+			newRealFirst = NULL;
+		}else{
+			newFirst     = S3DE_getPlak    (1);
+			newRealFirst = S3DE_getRealPlak(1);
+		}
+
+		//free old first
+		free(S3DE_plaks);
+		free(S3DE_realPlaks);
+
+		//attach newFirst
+		S3DE_plaks     = newFirst;
+		S3DE_realPlaks = newRealFirst;
+
+	//other cases
+	}else{
+		plak* prevPlak     = S3DE_getPlak    (index-1);
+		plak* prevRealPlak = S3DE_getRealPlak(index-1);
+		plak* nextPlak     = (prevPlak->next    )->next;
+		plak* nextRealPlak = (prevRealPlak->next)->next;
+
+		//free indexed plak
+		free(prevPlak->next    );
+		free(prevRealPlak->next);
+
+		//attach nextPlak to prevPlak
+		prevPlak->next     = nextPlak;
+		prevRealPlak->next = nextRealPlak;
+	}
+	S3DE_plaksNbr--;
+}
+
+
+
+
+
+
+
+
 
 
 
@@ -608,7 +700,7 @@ static int S3DE_strcmpN(char* s1, char* s2, int N){
 	return 1;
 }
 
-void S3DE_addPlaksFromSTL(char* fileName, int dx,int dy,int dz, int color){
+void S3DE_addPlaksFromSTL(char* fileName, int dx,int dy,int dz, int color, double scale){
 	//debug message
 	#ifdef DEBUG_ON
 	printf("DEBUG > S3DE.c : S3DE_addPlaksFromSTL() : Starting adding plaks from STL file \"%s\"...\n", fileName);
@@ -657,19 +749,19 @@ void S3DE_addPlaksFromSTL(char* fileName, int dx,int dy,int dz, int color){
 	int line_start = 0;
 	int vertexNbr  = 0; //0:(x1,y1,z1), 1:(x2,y2,z2), 2:(x3,y3,z3)
 	int cooNbr     = 0; //0:x, 1:y, 2:z
-	float x1=0; float y1=0; float z1=0;
-	float x2=0; float y2=0; float z2=0;
-	float x3=0; float y3=0; float z3=0;
+	double x1 = 0;	double y1 = 0;	double z1 = 0;
+	double x2 = 0;	double y2 = 0;	double z2 = 0;
+	double x3 = 0;	double y3 = 0;	double z3 = 0;
 	char current[2];
 	current[0] = '\0';
 	current[1] = '\0';
-	char* floatText = malloc(S3DE_TEXT_FOR_FLOAT);
-	if(floatText == NULL){
+	char* doubleText = malloc(S3DE_TEXT_FOR_FLOAT);
+	if(doubleText == NULL){
 		printf("RUNTIME ERROR > S3DE.c : S3DE_addPlaksFromSTL() : Computer refuses to give more memory.\n");
 		return;
 	}
 	for(int c=0; c < S3DE_TEXT_FOR_FLOAT; c++)
-		floatText[c] = '\0';
+		doubleText[c] = '\0';
 
 	//analysis
 	for(int c=0; c < file_len; c++){
@@ -705,31 +797,31 @@ void S3DE_addPlaksFromSTL(char* fileName, int dx,int dy,int dz, int color){
 							*current = text[line_start+i];
 
 							#ifdef DEEP_DEBUG_ON
-							printf("DEEP DEBUG > S3DE.c : S3DE_addPlaksFromSTL() : floatText : %s.\n", floatText);
+							printf("DEEP DEBUG > S3DE.c : S3DE_addPlaksFromSTL() : doubleText : %s.\n", doubleText);
 							#endif
 
 							if(*current == ' ' || *current == '\n'){
 								//separation found
 								switch(cooNbr){
 									case 0: //x
-										x1 = atof(floatText)*S3DE_STL_AMPLIFICATION + (float)dx;
+										x1 = atof(doubleText)*scale + (double)dx;
 										cooNbr++;
 									break;
 									case 1: //y
-										y1 = atof(floatText)*S3DE_STL_AMPLIFICATION + (float)dy;
+										y1 = atof(doubleText)*scale + (double)dy;
 										cooNbr++;
 									break;
 									case 2: //z
-										z1 = atof(floatText)*S3DE_STL_AMPLIFICATION + (float)dz;
+										z1 = atof(doubleText)*scale + (double)dz;
 										cooNbr=0;
 									break;
 								}
 
-								//reset floatText
+								//reset doubleText
 								for(int f=0; f < S3DE_TEXT_FOR_FLOAT; f++)
-									floatText[f] = '\0';
+									doubleText[f] = '\0';
 							}else
-								strcat(floatText, current);
+								strcat(doubleText, current);
 
 						}
 						vertexNbr++;
@@ -743,31 +835,31 @@ void S3DE_addPlaksFromSTL(char* fileName, int dx,int dy,int dz, int color){
 							*current = text[line_start+i];
 
 							#ifdef DEEP_DEBUG_ON
-							printf("DEEP DEBUG > S3DE.c : S3DE_addPlaksFromSTL() : floatText : %s.\n", floatText);
+							printf("DEEP DEBUG > S3DE.c : S3DE_addPlaksFromSTL() : doubleText : %s.\n", doubleText);
 							#endif
 
 							if(*current == ' ' || *current == '\n'){
 								//separation found
 								switch(cooNbr){
 									case 0: //x
-										x2 = atof(floatText)*S3DE_STL_AMPLIFICATION + (float)dx;
+										x2 = atof(doubleText)*scale + (double)dx;
 										cooNbr++;
 									break;
 									case 1: //y
-										y2 = atof(floatText)*S3DE_STL_AMPLIFICATION + (float)dy;
+										y2 = atof(doubleText)*scale + (double)dy;
 										cooNbr++;
 									break;
 									case 2: //z
-										z2 = atof(floatText)*S3DE_STL_AMPLIFICATION + (float)dz;
+										z2 = atof(doubleText)*scale + (double)dz;
 										cooNbr=0;
 									break;
 								}
 
-								//reset floatText
+								//reset doubleText
 								for(int f=0; f < S3DE_TEXT_FOR_FLOAT; f++)
-									floatText[f] = '\0';
+									doubleText[f] = '\0';
 							}else
-								strcat(floatText, current);
+								strcat(doubleText, current);
 						}
 						vertexNbr++;
 					break;
@@ -780,31 +872,31 @@ void S3DE_addPlaksFromSTL(char* fileName, int dx,int dy,int dz, int color){
 							*current = text[line_start+i];
 
 							#ifdef DEEP_DEBUG_ON
-							printf("DEEP DEBUG > S3DE.c : S3DE_addPlaksFromSTL() : floatText : %s.\n", floatText);
+							printf("DEEP DEBUG > S3DE.c : S3DE_addPlaksFromSTL() : doubleText : %s.\n", doubleText);
 							#endif
 
 							if(*current == ' ' || *current == '\n'){
 								//separation found
 								switch(cooNbr){
 									case 0: //x
-										x3 = atof(floatText)*S3DE_STL_AMPLIFICATION + (float)dx;
+										x3 = atof(doubleText)*scale + (double)dx;
 										cooNbr++;
 									break;
 									case 1: //y
-										y3 = atof(floatText)*S3DE_STL_AMPLIFICATION + (float)dy;
+										y3 = atof(doubleText)*scale + (double)dy;
 										cooNbr++;
 									break;
 									case 2: //z
-										z3 = atof(floatText)*S3DE_STL_AMPLIFICATION + (float)dz;
+										z3 = atof(doubleText)*scale + (double)dz;
 										cooNbr=0;
 									break;
 								}
 
-								//reset floatText
+								//reset doubleText
 								for(int f=0; f < S3DE_TEXT_FOR_FLOAT; f++)
-									floatText[f] = '\0';
+									doubleText[f] = '\0';
 							}else
-								strcat(floatText, current);
+								strcat(doubleText, current);
 						}
 
 						//terminate registration of the plak
@@ -849,7 +941,7 @@ void S3DE_addPlaksFromSTL(char* fileName, int dx,int dy,int dz, int color){
 	#endif
 }
 
-void S3DE_saveSTLfromPlaks(char* fileName){
+void S3DE_saveSTLfromPlaks(char* fileName, double scale){
 	//error case
 	if(fileName == NULL){
 		printf("RUNTIME ERROR > S3DE.c : S3DE_saveSTLfromPlaks() : Unable to export plaks, file name is NULL.\n");
@@ -869,34 +961,34 @@ void S3DE_saveSTLfromPlaks(char* fileName){
 	for(int p=0; p < S3DE_plaksNbr; p++){
 		current = S3DE_getPlak(p)->points;
 		fprintf(f," facet normal %f %f %f\n", //                    ------------------->   ------------------->
-			(float)(                          //vectorial product : current[0]current[1] ^ current[0]current[2]
+			(double)(                          //vectorial product : current[0]current[1] ^ current[0]current[2]
 				(current[1].y - current[0].y)*(current[2].z - current[0].z) -
 				(current[1].z - current[0].z)*(current[2].y - current[0].y)
-			) / S3DE_STL_AMPLIFICATION,
-			(float)(
+			) * scale,
+			(double)(
 				(current[2].x - current[0].x)*(current[1].z - current[0].z) -
 				(current[2].z - current[0].z)*(current[1].x - current[0].x)
-			) / S3DE_STL_AMPLIFICATION,
-			(float)(
+			) * scale,
+			(double)(
 				(current[1].x - current[0].x)*(current[2].y - current[0].y) -
 				(current[1].y - current[0].y)*(current[2].x - current[0].x)
-			) / S3DE_STL_AMPLIFICATION
+			) *scale
 		);
 		fprintf(f,"  outer loop\n");
 		fprintf(f,"  vertex %f %f %f\n",
-			(float)current[0].x / S3DE_STL_AMPLIFICATION,
-			(float)current[0].y / S3DE_STL_AMPLIFICATION,
-			(float)current[0].z / S3DE_STL_AMPLIFICATION
+			(double)current[0].x * scale,
+			(double)current[0].y * scale,
+			(double)current[0].z * scale
 		);
 		fprintf(f,"  vertex %f %f %f\n",
-			(float)current[1].x / S3DE_STL_AMPLIFICATION,
-			(float)current[1].y / S3DE_STL_AMPLIFICATION,
-			(float)current[1].z / S3DE_STL_AMPLIFICATION
+			(double)current[1].x * scale,
+			(double)current[1].y * scale,
+			(double)current[1].z * scale
 		);
 		fprintf(f,"  vertex %f %f %f\n",
-			(float)current[2].x / S3DE_STL_AMPLIFICATION,
-			(float)current[2].y / S3DE_STL_AMPLIFICATION,
-			(float)current[2].z / S3DE_STL_AMPLIFICATION
+			(double)current[2].x * scale,
+			(double)current[2].y * scale,
+			(double)current[2].z * scale
 		);
 		fprintf(f,"  endloop\n");
 		fprintf(f," endfacet\n\n");
@@ -912,6 +1004,14 @@ void S3DE_saveSTLfromPlaks(char* fileName){
 	printf("DEBUG > S3DE.c : S3DE_saveSTLfromPlaks() : Plaks have been exported into \"%s\".\n", fileName);
 	#endif
 }
+
+
+
+
+
+
+
+
 
 
 
@@ -951,14 +1051,17 @@ static void S3DEL_display(){
 	glClearColor(0.f,0.f,0.f,0.f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	//color & depth buffers reset
+	//reset color & depth buffers
 	int index=0;
 	for(int y=0; y < S3DE_height; y++){
 		for(int x=0; x < S3DE_width; x++){
 			S3DE_colorBuffer[index  ] = S3DE_SKYCOLOR;
-			S3DE_depthBuffer[index++] = FLT_MAX;
+			S3DE_depthBuffer[index++] = DBL_MAX;
 		}
 	}
+
+	//apply space rotations & movements
+	S3DE_realAllPlaks();
 
 	//counter for rendered plaks
 	#ifdef DEBUG_ON
@@ -966,7 +1069,7 @@ static void S3DEL_display(){
 	#endif
 
 	//screen rendering
-	plak* current = S3DE_plaks;
+	plak* current = S3DE_realPlaks;
 	for(int p=0; p < S3DE_plaksNbr; p++){
 		if(
 			//abs(current->points[0].x - S3DE_position.x) < S3DE_RENDER_DISTANCE && //disable this optimization rule because
@@ -979,12 +1082,12 @@ static void S3DEL_display(){
 			//abs(current->points[2].y - S3DE_position.y) < S3DE_RENDER_DISTANCE && //needs the WHOLE plak inside
 			//abs(current->points[2].z - S3DE_position.z) < S3DE_RENDER_DISTANCE && //RENDER_DISTANCE zone
 			(
-				S3DE_real(current->points[0]).z > S3DE_BACKSCENE_LIMIT ||
-				S3DE_real(current->points[1]).z > S3DE_BACKSCENE_LIMIT ||
-				S3DE_real(current->points[2]).z > S3DE_BACKSCENE_LIMIT
+				current->points[0].z > S3DE_BACKSCENE_LIMIT ||
+				current->points[1].z > S3DE_BACKSCENE_LIMIT ||
+				current->points[2].z > S3DE_BACKSCENE_LIMIT
 			)
 		){
-			S3DE_render(current);
+			S3DE_renderPlak(current);
 
 			//count how many plaks are rendered
 			#ifdef DEBUG_ON
@@ -1092,7 +1195,7 @@ static void S3DEL_reshape(int newWidth,int newHeight){
 	free(S3DE_colorBuffer);
 	free(S3DE_depthBuffer);
 	S3DE_colorBuffer = malloc(S3DE_width*S3DE_height*4);
-	S3DE_depthBuffer = malloc(S3DE_width*S3DE_height*4);
+	S3DE_depthBuffer = malloc(S3DE_width*S3DE_height*8);
 	if(S3DE_colorBuffer == NULL || S3DE_depthBuffer == NULL){
 		printf("FATAL ERROR > S3DE.c : S3DE_addPlaksFromSTL() : Computer refuses to give more memory.\n");
 		exit(EXIT_FAILURE);
@@ -1103,7 +1206,7 @@ static void S3DEL_reshape(int newWidth,int newHeight){
 	for(int y=0; y < S3DE_height; y++){
 		for(int x=0; x < S3DE_width; x++){
 			S3DE_colorBuffer[index  ] = S3DE_SKYCOLOR;
-			S3DE_depthBuffer[index++] = FLT_MAX;
+			S3DE_depthBuffer[index++] = DBL_MAX;
 		}
 	}
 
@@ -1115,6 +1218,14 @@ static void S3DEL_reshape(int newWidth,int newHeight){
 	glMatrixMode(GL_MODELVIEW);
 	S3DE_refresh();
 }
+
+
+
+
+
+
+
+
 
 
 
@@ -1142,7 +1253,7 @@ void S3DE_setColor(int r, int v, int b){
 	glColor3f(r/255.f, v/255.f, b/255.f);
 }
 
-void S3DE_setThickness(float thickness){
+void S3DE_setThickness(double thickness){
 	glPointSize(thickness);
 	glLineWidth(thickness);
 }
@@ -1154,20 +1265,20 @@ int S3DE_inScreen(int x,int y){
 
 
 //graphics
-void S3DE_point(float x, float y){
+void S3DE_point(double x, double y){
 	glBegin(GL_POINTS);
 		glVertex2f(x,y);
 	glEnd();
 }
 
-void S3DE_line(float x1,float y1, float x2,float y2){
+void S3DE_line(double x1,double y1, double x2,double y2){
 	glBegin(GL_LINES);
 		glVertex2f(x1,y1);
 		glVertex2f(x2,y2);
 	glEnd();
 }
 
-void S3DE_triangle(float x1,float y1, float x2,float y2, float x3,float y3, int filled){
+void S3DE_triangle(double x1,double y1, double x2,double y2, double x3,double y3, int filled){
 	if(filled){
 		glBegin(GL_TRIANGLES);
 			glVertex2f(x1,y1);
@@ -1181,7 +1292,7 @@ void S3DE_triangle(float x1,float y1, float x2,float y2, float x3,float y3, int 
 	}
 }
 
-void S3DE_rectangle(float x1,float y1, float x2,float y2, int filled){
+void S3DE_rectangle(double x1,double y1, double x2,double y2, int filled){
 	if(filled){
 		glBegin(GL_QUADS);
 			glVertex2f(x1,y1);
@@ -1204,7 +1315,7 @@ void S3DE_rectangle(float x1,float y1, float x2,float y2, int filled){
 	}
 }
 
-void S3DE_quad(float x1,float y1, float x2,float y2, float x3,float y3, float x4,float y4, int filled){
+void S3DE_quad(double x1,double y1, double x2,double y2, double x3,double y3, double x4,double y4, int filled){
 	if(filled){
 		glBegin(GL_QUADS);
 			glVertex2f(x1,y1);
@@ -1230,7 +1341,7 @@ void S3DE_quad(float x1,float y1, float x2,float y2, float x3,float y3, float x4
 
 
 //text
-void S3DE_text(char* text, float size, float x,float y){
+void S3DE_text(char* text, double size, double x,double y){
 	//moving over display (use of the 3rd dimension)
 	glPushMatrix();
 	glTranslatef(x,y,0);
@@ -1286,6 +1397,14 @@ void S3DE_setTimer(int ms){
 
 
 
+
+
+
+
+
+
+
+
 // ---------------- BASICS -----------------
 
 //init
@@ -1317,6 +1436,7 @@ void S3DE_init(int argc, char** argv, const char* name, unsigned int width,unsig
 	glEnable(GL_POLYGON_SMOOTH);
 	glEnable(GL_NORMALIZE);
 	glutSetKeyRepeat(GLUT_KEY_REPEAT_OFF);
+	glPointSize(2.f);
 
 	//math init
 	S3DE_cosX = cos(S3DE_angleX);
@@ -1330,7 +1450,7 @@ void S3DE_init(int argc, char** argv, const char* name, unsigned int width,unsig
 	S3DE_height   = height;
 	S3DE_height_2 = height/2;
 	S3DE_colorBuffer = malloc(S3DE_width*S3DE_height*4);
-	S3DE_depthBuffer = malloc(S3DE_width*S3DE_height*4);
+	S3DE_depthBuffer = malloc(S3DE_width*S3DE_height*8);
 
 	//error cases
 	if(S3DE_colorBuffer == NULL || S3DE_depthBuffer == NULL){
@@ -1343,7 +1463,7 @@ void S3DE_init(int argc, char** argv, const char* name, unsigned int width,unsig
 	for(int y=0; y < S3DE_height; y++){
 		for(int x=0; x < S3DE_width; x++){
 			S3DE_colorBuffer[index  ] = S3DE_SKYCOLOR;
-			S3DE_depthBuffer[index++] = FLT_MAX;
+			S3DE_depthBuffer[index++] = DBL_MAX;
 		}
 	}
 
@@ -1381,4 +1501,167 @@ void S3DE_stop(){
 	//stop 2D engine
 	glutDestroyWindow(S3DE_window);
 	exit(EXIT_SUCCESS);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ---------------- FORMS PATCH ----------------
+
+//hexaedron
+void S3DE_addPlaks_cuboid(
+	int x, int y, int z,
+	int width, int height, int depth,
+	int color
+){
+	//lengths
+	double w_2 = width /2;
+	double h_2 = height/2;
+	double d_2 = depth /2;
+
+	//TEMP <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+	int ncolor = ~color | 255;
+
+/* ------------------------------------------------
+
+                   Coordinates plan
+                    ----------------
+
+              w
+         <-------->
+
+      ^   E--------F   ^
+    h |   |\       |\   \
+      |   | \      | \   \
+      v   G--\-----H  \   \ d
+           \  \     \  \   \
+            \  \     \  \   \      -->
+             \  \     \  \   \      z
+              \  A--------B   v     ^
+               \ |      \ |          \
+                \|       \|           \        -->
+                 C--------D            X------> x
+                                       |
+        A(-w_2, -h_2, -d_2)            |
+        B( w_2, -h_2, -d_2)            | -->
+        C(-w_2,  h_2, -d_2)            v  y
+        D( w_2,  h_2, -d_2)
+
+        E(-w_2, -h_2,  d_2)
+        F( w_2, -h_2,  d_2)
+        G(-w_2,  h_2,  d_2)
+        H( w_2,  h_2,  d_2)
+------------------------------------------------ */
+
+
+
+	//FRONT - BACK
+
+	//front face
+	S3DE_addPlak(
+		x-w_2, y-h_2, z-d_2, //A
+		x+w_2, y-h_2, z-d_2, //B
+		x-w_2, y+h_2, z-d_2, //C
+		color
+	);
+	S3DE_addPlak(
+		x+w_2, y-h_2, z-d_2, //B
+		x-w_2, y+h_2, z-d_2, //C
+		x+w_2, y+h_2, z-d_2, //D
+		ncolor
+	);
+
+	//back face
+	S3DE_addPlak(
+		x-w_2, y-h_2, z+d_2, //E
+		x+w_2, y-h_2, z+d_2, //F
+		x-w_2, y+h_2, z+d_2, //G
+		color
+	);
+	S3DE_addPlak(
+		x+w_2, y-h_2, z+d_2, //F
+		x-w_2, y+h_2, z+d_2, //G
+		x+w_2, y+h_2, z+d_2, //H
+		ncolor
+	);
+
+
+
+	//UP - DOWN
+
+	//up face
+	S3DE_addPlak(
+		x-w_2, y-h_2, z-d_2, //A
+		x+w_2, y-h_2, z-d_2, //B
+		x-w_2, y-h_2, z+d_2, //E
+		color
+	);
+	S3DE_addPlak(
+		x+w_2, y-h_2, z-d_2, //B
+		x-w_2, y-h_2, z+d_2, //E
+		x+w_2, y-h_2, z+d_2, //F
+		ncolor
+	);
+
+	//down face
+	S3DE_addPlak(
+		x-w_2, y+h_2, z-d_2, //C
+		x+w_2, y+h_2, z-d_2, //D
+		x-w_2, y+h_2, z+d_2, //G
+		color
+	);
+	S3DE_addPlak(
+		x+w_2, y+h_2, z-d_2, //D
+		x-w_2, y+h_2, z+d_2, //G
+		x+w_2, y+h_2, z+d_2, //H
+		ncolor
+	);
+
+
+
+	//LEFT - RIGHT
+
+	//left face
+	S3DE_addPlak(
+		x-w_2, y+h_2, z-d_2, //C
+		x-w_2, y+h_2, z+d_2, //G
+		x-w_2, y-h_2, z-d_2, //A
+		color
+	);
+	S3DE_addPlak(
+		x-w_2, y+h_2, z+d_2, //G
+		x-w_2, y-h_2, z-d_2, //A
+		x-w_2, y-h_2, z+d_2, //E
+		ncolor
+	);
+
+	//right face
+	S3DE_addPlak(
+		x+w_2, y+h_2, z-d_2, //D
+		x+w_2, y-h_2, z-d_2, //B
+		x+w_2, y+h_2, z+d_2, //H
+		color
+	);
+	S3DE_addPlak(
+		x+w_2, y-h_2, z-d_2, //B
+		x+w_2, y+h_2, z+d_2, //H
+		x+w_2, y-h_2, z+d_2, //F
+		ncolor
+	);
 }

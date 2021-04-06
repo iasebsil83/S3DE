@@ -220,48 +220,23 @@ enum S3DE_EVENTS{
 
 //3D constants
 #define S3DE_RENDER_DISTANCE 1000000000 //in pixels
-#define S3DE_SKYCOLOR 16777215          //RGBA color corresponding to (0,255,255,255) (perfect cyan)
-#define S3DE_TEXT_FOR_FLOAT 46
-#define S3DE_BACKSCENE_LIMIT 0          //max z coordinate for the scene behind you
+#define S3DE_SKYCOLOR        255        //RGBA color corresponding to (0,  0,  0,255) (perfect black)
+#define S3DE_TEXT_FOR_FLOAT   46        //maximum number of characters required to write a float in a .stl file
+#define S3DE_BACKSCENE_LIMIT   0        //max z coordinate for the scene behind you
 #define S3DE_FRONT 0                    //    to be rendered (in pixels)
-#define S3DE_BACK 1
-#define S3DE_LEFT 2
+#define S3DE_BACK  1
+#define S3DE_LEFT  2
 #define S3DE_RIGHT 3
-#define S3DE_UP 4
-#define S3DE_DOWN 5
-#define S3DE_STL_AMPLIFICATION 25       //STL files values will be amplified
+#define S3DE_UP    4
+#define S3DE_DOWN  5
 #define S3DE_STL_BICOLOR_ENABLE         //    to correspond to the scene's scale
 
 
 
 //3D point
 typedef struct{
-	float x,y,z;
+	double x,y,z;
 } xyz;
-
-
-
-//3D plaks (linked list)
-struct PLAK{
-	xyz points[3];
-	int color;
-	struct PLAK* next;
-};
-typedef struct PLAK plak;
-
-
-
-
-
-
-
-
-// ---------------- 3D ENGINE ----------------
-float S3DE_getAngleX();
-float S3DE_getAngleY();
-void S3DE_addAngleX(float angle);
-void S3DE_addAngleY(float angle);
-void S3DE_goStraight(float distance, char direction);
 
 
 
@@ -271,14 +246,31 @@ void S3DE_goStraight(float distance, char direction);
 
 
 // ---------------- PLAKS MANAGEMENT ----------------
+
+// ---------------- 3D ENGINE ----------------
+
+//space rotations & movements
+double S3DE_getAngleX();
+double S3DE_getAngleY();
+void S3DE_addAngleX(double angle);
+void S3DE_addAngleY(double angle);
+void S3DE_goStraight(double step, char direction);
+
+
+
+
+
+
+
+
+//basics
 void S3DE_addPlak(
-	int x0,int y0,int z0,
-	int x1,int y1,int z1,
-	int x2,int y2,int z2,
-	int color
+	double x0,double y0,double z0,
+	double x1,double y1,double z1,
+	double x2,double y2,double z2,
+	int color //in RGBA format (see S3DE_setPixelRGBA())
 );
 void S3DE_delPlak(int index);
-plak* S3DE_getPlak(int index);
 
 
 
@@ -288,8 +280,8 @@ plak* S3DE_getPlak(int index);
 
 
 // ---------------- PLAKS / STL FILE CONVERSIONS ----------------
-void S3DE_addPlaksFromSTL(char* fileName, int dx,int dy,int dz, int color);
-void S3DE_saveSTLfromPlaks(char* fileName);
+void S3DE_addPlaksFromSTL(char* fileName, int dx,int dy,int dz, int color, double scale);
+void S3DE_saveSTLfromPlaks(char* fileName, double scale);
 
 
 
@@ -304,18 +296,18 @@ void S3DE_saveSTLfromPlaks(char* fileName);
 void S3DE_refresh();
 void S3DE_fullScreen();
 void S3DE_setColor(int r, int v, int b);
-void S3DE_setThickness(float thickness);
+void S3DE_setThickness(double thickness);
 int S3DE_inScreen(int x,int y);
 
 //graphics
-void S3DE_point(float x, float y);
-void S3DE_line(float x1,float y1, float x2,float y2);
-void S3DE_triangle(float x1,float y1, float x2,float y2, float x3,float y3, int filled);
-void S3DE_rectangle(float x1,float y1, float x2,float y2, int filled);
-void S3DE_quad(float x1,float y1, float x2,float y2, float x3,float y3, float x4,float y4, int filled);
+void S3DE_point(double x, double y);
+void S3DE_line(double x1,double y1, double x2,double y2);
+void S3DE_triangle(double x1,double y1, double x2,double y2, double x3,double y3, int filled);
+void S3DE_rectangle(double x1,double y1, double x2,double y2, int filled);
+void S3DE_quad(double x1,double y1, double x2,double y2, double x3,double y3, double x4,double y4, int filled);
 
 //text
-void S3DE_text(char* text, float size, float x,float y);
+void S3DE_text(char* text, double size, double x,double y);
 
 //images
 void S3DE_imageRGBA(int x,int y, int width,int height, int* data);
@@ -339,6 +331,52 @@ void S3DE_init(int argc, char** argv, const char* name, unsigned int width,unsig
 //start - stop
 void S3DE_start();
 void S3DE_stop();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ---------------- FORMS PATCH ----------------
+
+//plane
+#define S3DE_addPlaks_plane( \
+	x1, y1, z1,              \
+	x2, y2, z2,              \
+	x3, y3, z3,              \
+	x4, y4, z4,              \
+	color                    \
+) S3DE_addPlak(x1,y1,z1,x2,y2,z2,x3,y3,z3,color);S3DE_addPlak(x2,y2,z2,x3,y3,z3,x4,y4,z4,~color|255)
+
+
+
+//hexaedrons
+void S3DE_addPlaks_cuboid(
+	int x, int y, int z,
+	int width, int height, int depth,
+	int color
+);
+
+#define S3DE_addPlaks_cube( \
+	x,y,z,                  \
+	side,                   \
+	color                   \
+) S3DE_addPlaks_cuboid(x,y,z,side,side,side,color)
+
 
 
 
