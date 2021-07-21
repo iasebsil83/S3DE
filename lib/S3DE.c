@@ -33,14 +33,6 @@
 
 
 
-
-
-
-
-
-
-
-
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ S3DE [0.1.7] ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                             Simple 3Dimensional Engine
 
@@ -161,14 +153,6 @@
 
 
 
-
-
-
-
-
-
-
-
 // ---------------- INITIALIZATION ----------------
 
 //global vars
@@ -233,14 +217,6 @@ unsigned int S3DE_height    = 0;
 
 //event handler
 extern void S3DE_event(int event);
-
-
-
-
-
-
-
-
 
 
 
@@ -532,14 +508,6 @@ static void S3DE_renderPlak(plak* rp){ //triangle projection on screen made with
 
 
 
-
-
-
-
-
-
-
-
 // ---------------- PLAKS MANAGEMENT ----------------
 
 //basics
@@ -661,14 +629,6 @@ void S3DE_delPlak(int index){
 	}
 	S3DE_plaksNbr--;
 }
-
-
-
-
-
-
-
-
 
 
 
@@ -1016,14 +976,6 @@ void S3DE_saveSTLfromPlaks(char* fileName, double scale){
 
 
 
-
-
-
-
-
-
-
-
 // ---------------- LOCAL EVENT HANDLERS (S3DEL) ----------------
 
 //timed executions
@@ -1230,14 +1182,6 @@ static void S3DEL_reshape(int newWidth,int newHeight){
 
 
 
-
-
-
-
-
-
-
-
 // ---------------- 2D UTILITIES ----------------
 
 //useful
@@ -1397,14 +1341,6 @@ void S3DE_setTimer(int ms){
 
 
 
-
-
-
-
-
-
-
-
 // ---------------- BASICS -----------------
 
 //init
@@ -1514,14 +1450,6 @@ void S3DE_stop(){
 
 
 
-
-
-
-
-
-
-
-
 // ---------------- FORMS PATCH ----------------
 
 //hexaedron
@@ -1541,7 +1469,7 @@ void S3DE_addPlaks_cuboid(
 /* ------------------------------------------------
 
                    Coordinates plan
-                    ----------------
+                   ----------------
 
               w
          <-------->

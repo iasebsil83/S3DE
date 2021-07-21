@@ -8,18 +8,6 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 // ---------------- DECLARATIONS ----------------
 
 //keyboard constants
@@ -186,8 +174,6 @@ enum S3DE_KEYS{
 	S3DE_KEY_CEDILLA_C  = 0x0e7
 };
 
-
-
 //event constants
 enum S3DE_EVENTS{
 	S3DE_KEYBOARD,
@@ -199,8 +185,6 @@ enum S3DE_EVENTS{
 	S3DE_TIMER
 };
 
-
-
 //mouse constants
 #define S3DE_MOUSE_PRESSED  0x0000
 #define S3DE_MOUSE_RELEASED 0x0001
@@ -210,13 +194,9 @@ enum S3DE_EVENTS{
 #define S3DE_SCROLL_UP      0x0003
 #define S3DE_SCROLL_DOWN    0x0004
 
-
-
 //2D graphics
 #define S3DE_EMPTY  0
 #define S3DE_FILLED 1
-
-
 
 //3D constants
 #define S3DE_RENDER_DISTANCE 1000000000 //in pixels
@@ -231,8 +211,6 @@ enum S3DE_EVENTS{
 #define S3DE_DOWN  5
 #define S3DE_STL_BICOLOR_ENABLE         //    to correspond to the scene's scale
 
-
-
 //3D point
 typedef struct{
 	double x,y,z;
@@ -244,8 +222,6 @@ typedef struct{
 
 
 
-
-// ---------------- PLAKS MANAGEMENT ----------------
 
 // ---------------- 3D ENGINE ----------------
 
@@ -262,6 +238,8 @@ void S3DE_goStraight(double step, char direction);
 
 
 
+
+// ---------------- PLAK MANAGEMENT ----------------
 
 //basics
 void S3DE_addPlak(
@@ -339,18 +317,6 @@ void S3DE_stop();
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 // ---------------- FORMS PATCH ----------------
 
 //plane
@@ -376,11 +342,6 @@ void S3DE_addPlaks_cuboid(
 	side,                   \
 	color                   \
 ) S3DE_addPlaks_cuboid(x,y,z,side,side,side,color)
-
-
-
-
-
 
 
 

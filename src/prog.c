@@ -7,15 +7,7 @@
 
 
 //graphics
-#include "S3DE.h" //3D motor
-
-
-
-
-
-
-
-
+#include "../lib/S3DE.h" //3D motor
 
 
 
@@ -48,14 +40,6 @@
 
     Contact : ...
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-
-
-
-
-
-
-
-
 
 
 
@@ -125,14 +109,6 @@ char state = STATE__IDLE;
 
 
 
-
-
-
-
-
-
-
-
 // ---------------- 3D SCENE ----------------
 
 //init
@@ -152,20 +128,18 @@ void buildScene(){
 
 
 
-
-
 	//STL IMPORTED
 
 	//by Beau : "https://www.prusaprinters.org/social/20555-beau/prints"
 	/*S3DE_addPlaksFromSTL(
-		"STL/dog.stl",
+		"stl/dog.stl",
 		   0,1500, 800,
 		S3DE_setPixelRGBA(0,0,0,255),
 		25
 	);*/
 
 	S3DE_addPlaksFromSTL(
-		"STL/hand.stl",
+		"stl/hand.stl",
 		2000, 500, 1500,
 		S3DE_setPixelRGBA(226,143,203,255),
 		8000
@@ -173,12 +147,10 @@ void buildScene(){
 
 	//by Vash Wolf : "https://www.myminifactory.com/users/sgtcold1"
 	/*S3DE_addPlaksFromSTL(
-		"STL/minecraft-world.stl",
+		"stl/minecraft-world.stl",
 		0,0,400,
 		S3DE_setPixelRGBA(255,0,255,255)
 	);*/
-
-
 
 
 
@@ -232,22 +204,11 @@ void buildScene(){
 
 
 
-
-
-
-
-
-
-
-
 // ---------------- EVENTS ----------------
 
 //event handlers
 void S3DE_event(int event){
 	switch(event){
-
-
-
 
 
 
@@ -265,9 +226,6 @@ void S3DE_event(int event){
 			//	0
 			//);
 		break;
-
-
-
 
 
 
@@ -344,8 +302,8 @@ void S3DE_event(int event){
 
 					//save scene
 					case S3DE_KEY_L:	case S3DE_KEY_l:
-						S3DE_saveSTLfromPlaks("STL/save.stl", 0.0001);
-						printf("Saved scene in STL/save.stl\n");
+						S3DE_saveSTLfromPlaks("stl/save.stl", 0.0001);
+						printf("Saved scene in stl/save.stl\n");
 					break;
 
 					//fullScreen
@@ -376,9 +334,6 @@ void S3DE_event(int event){
 
 
 
-
-
-
 		//mouse click
 		case S3DE_MOUSE_CLICK:
 			if(S3DE_mouseState == S3DE_MOUSE_RELEASED) //get only "mouse pressed" events
@@ -399,15 +354,9 @@ void S3DE_event(int event){
 
 
 
-
-
-
 		//mouse move
 		case S3DE_MOUSE_MOVE:
 		break;
-
-
-
 
 
 
@@ -422,9 +371,6 @@ void S3DE_event(int event){
 				break;
 			}
 		break;
-
-
-
 
 
 
@@ -471,22 +417,11 @@ void S3DE_event(int event){
 
 
 
-
-
-
 		//resize window
 		case S3DE_RESIZE:
 		break;
 	}
 }
-
-
-
-
-
-
-
-
 
 
 
@@ -527,4 +462,3 @@ int main(int argc, char** argv){
 
 	return EXIT_SUCCESS;
 }
-

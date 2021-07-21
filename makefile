@@ -6,12 +6,12 @@ run: prog.o S3DE.o
 
 
 #program
-prog.o: src/prog.c src/S3DE.h
+prog.o: src/prog.c lib/S3DE.h
 	gcc -Wall -O2 -c src/prog.c
 
 
 
 #S3DE management (use S3DE.o/.h to access to 3D graphic engine)
-S3DE.o: src/S3DE.c src/S3DE.h
-	gcc -Wall -O2 -c src/S3DE.c -I/usr/include/GL
+S3DE.o: lib/S3DE.c lib/S3DE.h
+	gcc -Wall -O2 -c lib/S3DE.c -I/usr/include/GL
 
