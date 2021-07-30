@@ -1,4 +1,4 @@
-#execuutable
+#executable
 run: prog.o S3DE.o
 	gcc -Wall -o run prog.o S3DE.o -lm -lglut -lGL -lX11
 	rm -f *.o
