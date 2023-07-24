@@ -29,10 +29,6 @@
 
 
 
-
-
-
-
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ S3DE [0.1.7] ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                             Simple 3Dimensional Engine
 
@@ -127,24 +123,23 @@
     LICENCE :
 
     S3DE
-    Copyright (C) 2021  Sebastien SILVANO
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    any later version.
-    This program is distributed in the hope that it will be useful,
+    Copyright (C) 2021 Sebastien SILVANO
+
+    This library is free software; you can redistribute it and/or
+    modify it under the terms of the GNU Lesser General Public
+    License as published by the Free Software Foundation; either
+    version 2.1 of the License, or (at your option) any later version.
+
+    This library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-    You should have received a copy of the GNU General Public License
-    along with this program.
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public
+    License along with this library.
 
     If not, see <https://www.gnu.org/licenses/>.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-
-
-
-
 
 
 
@@ -217,10 +212,6 @@ unsigned int S3DE_height    = 0;
 
 //event handler
 extern void S3DE_event(int event);
-
-
-
-
 
 
 
@@ -504,10 +495,6 @@ static void S3DE_renderPlak(plak* rp){ //triangle projection on screen made with
 
 
 
-
-
-
-
 // ---------------- PLAKS MANAGEMENT ----------------
 
 //basics
@@ -629,10 +616,6 @@ void S3DE_delPlak(int index){
 	}
 	S3DE_plaksNbr--;
 }
-
-
-
-
 
 
 
@@ -972,10 +955,6 @@ void S3DE_saveSTLfromPlaks(char* fileName, double scale){
 
 
 
-
-
-
-
 // ---------------- LOCAL EVENT HANDLERS (S3DEL) ----------------
 
 //timed executions
@@ -1178,10 +1157,6 @@ static void S3DEL_reshape(int newWidth,int newHeight){
 
 
 
-
-
-
-
 // ---------------- 2D UTILITIES ----------------
 
 //useful
@@ -1337,10 +1312,6 @@ void S3DE_setTimer(int ms){
 
 
 
-
-
-
-
 // ---------------- BASICS -----------------
 
 //init
@@ -1438,10 +1409,6 @@ void S3DE_stop(){
 	glutDestroyWindow(S3DE_window);
 	exit(EXIT_SUCCESS);
 }
-
-
-
-
 
 
 
